@@ -26,14 +26,19 @@ module 101core(
 
 );
 
-  //
+  //------------------------
   // WIRE DEFINITION
+  //------------------------
 
-  // ALU
-  wire  [31:0]  alu_operand_a_wire;
-  wire  [31:0]  alu_operand_b_wire;
-  wire  [31:0]  alu_output_wire;
-  wire  [3:0]   alu_opcode_wire;
+    // ALU
+    wire  [31:0]  alu_operand_a_wire;
+    wire  [31:0]  alu_operand_b_wire;
+    wire  [31:0]  alu_output_wire;
+    wire  [3:0]   alu_opcode_wire;
+
+    // IMM GENERATOR
+    wire  [31:0]  imm_gen_input_wire;
+    wire  [31:0]  imm_gen_output_wire;
 
   ALU alu0( .alu_input_a(alu_operand_a_wire),
             .alu_input_b(alu_operand_b_wire),
