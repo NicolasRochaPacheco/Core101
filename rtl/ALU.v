@@ -19,7 +19,7 @@ module ALU(
   // INPUT
   input [31:0]  alu_input_a, // ALU_A
   input [31:0]  alu_input_b, // ALU_B
-  input [31:0]  alu_opcode,
+  input [2:0]  alu_opcode,
 
   // OUTPUT
   output [31:0] alu_output,
@@ -30,41 +30,28 @@ module ALU(
 // REG DEFINITION
 reg [31:0] alu_result_reg;
 
+// COMBINATIONAL LOGIC
 always@(*)
   begin
     case(alu_opcode)
-      4'b0000: // ALU OP: ALU_A + ALU_B
+      3'b0000: // ALU OP: ALU_A + ALU_B
         alu_result_reg = alu_input_a + alu_input_b;
-      4'b0001: // ALU OP: ALU_A - ALU_B
+      3'b0001: // ALU OP: shift left logical
+        alu_result_reg = 
+      3'b0010: // ALU OP: SLT ALU_A < ALU_B
+        alu_result_reg =
+      3'b0011: // ALU OP: SLTU ALU_A < ALU_B
+        alu_result_reg =
+      3'b0100: // ALU OP: ALU_A xor ALU_B
+        alu_result_reg = alu_input_a ^ alu_input_b;
+      3'b0101: // ALU OP:
+        alu_result_reg =
+      3'b0110: // ALU OP: ALU_A or ALU_B
+        alu_result_reg = alu_input_a | alu_input_b;
+      3'b0111: // ALU OP: ALU_A and ALU_B
+        alu_result_reg = alu_input_a & alu_input_b;
+      4'b1000: // ALU OP: ALU_A - ALU_B
         alu_result_reg = alu_input_a - alu_input_b;
-      4'b0010: // ALU OP:
-        alu_result_reg =
-      4'b0011: // ALU OP:
-        alu_result_reg =
-      4'b0100: // ALU OP:
-        alu_result_reg =
-      4'b0101: // ALU OP:
-        alu_result_reg =
-      4'b0110: // ALU OP:
-        alu_result_reg =
-      4'b0111: // ALU OP:
-        alu_result_reg =
-      4'b1000: // ALU OP:
-        alu_result_reg =
-      4'b1001: // ALU OP:
-        alu_result_reg =
-      4'b1010: // ALU OP:
-        alu_result_reg =
-      4'b1011: // ALU OP:
-        alu_result_reg =
-      4'b1100: // ALU OP:
-        alu_result_reg =
-      4'b1101: // ALU OP:
-        alu_result_reg =
-      4'b1110: // ALU OP:
-        alu_result_reg =
-      4'b1111: // ALU OP:
-        alu_result_reg =
     endcase
   end
 
