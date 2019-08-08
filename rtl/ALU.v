@@ -36,16 +36,16 @@ always@(*)
     case(alu_opcode)
       3'b0000: // ALU OP: ALU_A + ALU_B
         alu_result_reg = alu_input_a + alu_input_b;
-      3'b0001: // ALU OP: shift left logical
-        alu_result_reg = 
-      3'b0010: // ALU OP: SLT ALU_A < ALU_B
-        alu_result_reg =
-      3'b0011: // ALU OP: SLTU ALU_A < ALU_B
-        alu_result_reg =
+      3'b0001: // ALU OP: shift left logical ==
+        alu_result_reg = alu_input_a;
+      3'b0010: // ALU OP: SLT ALU_A < ALU_B ==
+        alu_result_reg = alu_input_a;
+      3'b0011: // ALU OP: SLTU ALU_A < ALU_B ==
+        alu_result_reg = alu_input_a;
       3'b0100: // ALU OP: ALU_A xor ALU_B
         alu_result_reg = alu_input_a ^ alu_input_b;
-      3'b0101: // ALU OP:
-        alu_result_reg =
+      3'b0101: // ALU OP: ==
+        alu_result_reg = alu_input_a;
       3'b0110: // ALU OP: ALU_A or ALU_B
         alu_result_reg = alu_input_a | alu_input_b;
       3'b0111: // ALU OP: ALU_A and ALU_B
