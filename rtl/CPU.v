@@ -40,11 +40,20 @@ module 101core(
     wire  [31:0]  imm_gen_input_wire;
     wire  [31:0]  imm_gen_output_wire;
 
+
+  //------------------------
+  // INSTANCE DEFINITION
+  //------------------------
+
   ALU alu0( .alu_input_a(alu_operand_a_wire),
             .alu_input_b(alu_operand_b_wire),
             .alu_opcode(alu_opcode_wire),
 
             .alu_output(alu_output_wire)
+          );
+
+  IMM_GEN imm0(
+
           );
 
 
