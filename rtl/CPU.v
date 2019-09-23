@@ -52,9 +52,5 @@ module 101core(
             .alu_output(alu_output_wire)
           );
 
-  IMM_GEN imm0(
-
-          );
-
 
 endmodule
