@@ -17,12 +17,13 @@
 module 101core(
 
   // CLOCK
-  input CLOCK_50
+  input CLOCK_50,
 
   // INPUT
+  input [31:0] ins_mem_ins,
 
   // OUTPUT
-
+  output [31:0] ins_mem_addr
 
 );
 
