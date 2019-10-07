@@ -20,7 +20,7 @@ module GEN_REG #(parameter DATA_WIDTH=32)(
     input general_register_clock_in,
 
     // INPUT
-    input [DATA_WIDTH-1:0] reg_input_data,
+    input [DATA_WIDTH-1:0] general_register_data_in,
     input general_register_set_in,
     input general_register_reset_in,
 
@@ -36,7 +36,7 @@ module GEN_REG #(parameter DATA_WIDTH=32)(
   always @ ( * )
     begin
       if (general_register_set_in == 1'b1)
-        general_register_signal_reg = reg_input_data;
+        general_register_signal_reg = general_register_data_in;
       else
         general_register_signal_reg = general_register_data_reg;
     end
