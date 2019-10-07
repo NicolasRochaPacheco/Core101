@@ -17,37 +17,37 @@
 
 module GEN_REG #(parameter DATA_WIDTH=32)(
     // CLOCK
-    input reg_clock_input,
+    input general_register_clock_in,
 
     // INPUT
     input [DATA_WIDTH-1:0] reg_input_data,
-    input reg_input_set,
-    input reg_input_reset,
+    input general_register_set_in,
+    input general_register_reset_in,
 
     // OUTPUT
-    output [DATA_WIDTH-1:0] reg_output_data
+    output [DATA_WIDTH-1:0] general_register_data_out
   );
 
   // REGISTER DEFINITION
-  reg [DATA_WIDTH-1:0] reg_input_signal;
-  reg [DATA_WIDTH-1:0] reg_stored_data;
+  reg [DATA_WIDTH-1:0] general_register_signal_reg;
+  reg [DATA_WIDTH-1:0] general_register_data_reg;
 
   // COMBINATIONAL LOGIC
   always @ ( * )
     begin
-      if (reg_input_set == 1'b1)
-        reg_input_signal = reg_input_data;
+      if (general_register_set_in == 1'b1)
+        general_register_signal_reg = reg_input_data;
       else
-        reg_input_signal = reg_stored_data;
+        general_register_signal_reg = general_register_data_reg;
     end
 
   // SEQUENTIAL LOGIC
-  always @ (posedge reg_clock_input)
+  always @ (posedge general_register_clock_in)
     begin
-      reg_stored_data = reg_input_signal;
+      general_register_data_reg = general_register_signal_reg;
     end
 
   // OUTPUT LOGIC
-  assign reg_output_data = reg_stored_data;
+  assign general_register_data_out = general_register_data_reg;
 
 endmodule
