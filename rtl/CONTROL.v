@@ -18,10 +18,14 @@ module CONTROL(
     input control_clock
   );
 
-always @ (posedge control_clock)
-  begin
+  // REGISTER DEFINITION
+  reg [3:0] state_reg; // State register used for pipeline staging
 
-  end
+  always @ (posedge datapath_clock)
+    begin
+
+      state_reg = state_reg + 1'b1; // Increment state register
+    end
 
 
 endmodule
