@@ -15,16 +15,41 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module DATAPATH(
-    input datapath_clock
+    // CLOCK, RESET
+    input datapath_clock_in,
+    input datapath_reset_in,
+
+    // INPUTS
+    input [31:0] datapath_ins_mem_data,
+
+    // OUTPUTS
+    output [31:0] datapath_ins_mem_addr
   );
 
 
-// REGISTER DEFINITION
-reg [3:0] state_reg;
+//=====================================
+// Instruction fetch instances
+//=====================================
+// Instruction register
+GEN_REG #(.DATA_WIDTH(32)) ir0 (
+    .general_register_clock_in(datapath_clock_in),
+    .general_register_data_in(datapath_ins_mem_data),
+    .general_register_set_in(<from_control_unit>),
+    .general_register_reset_in(datapath_reset_in),
+    .general_register_data_out(<to_instruction_decode>)
+  );
 
-always @ (posedge datapath_clock)
-  begin
+// Program counter
+GEN_REG #(.DATA_WIDTH(32)) pc0 (
+    .general_register_clock_in(datapath_clock_in),
+    .general_register_data_in(<from_ins_mem_interface>),
+    .general_register_set_in(<from_control_unit>),
+    .general_register_reset_in(datapath_reset_in),
+    .general_register_data_out(datapath_ins_mem_addr)
+  );
 
-  end
+
+
+
 
 endmodule
