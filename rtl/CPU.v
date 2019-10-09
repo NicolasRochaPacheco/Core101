@@ -28,12 +28,27 @@ module Core101_top(
   inout [31:0] data_mem_data_inout
 );
 
+  //=========================
+  // WIRE DEFINITION
+  //=========================
+  // Instrucion fetch
+  wire pc_set_val_wire;     // PC
+  wire [1:0] pc_src_wire;   // PC
+  wire ir_set_val_wire;     // IR
 
 
   DATAPATH datapath0(
-      .datapath_clock_in(<clock>),
-      .datapath_reset_in(<reset>)
+      .datapath_clock_in(clock_in),
+      .datapath_reset_in(reset_in),
+
+      .datapath_ins_mem_data_in(),
+      .datapath_ins_mem_addr_out(),
+
+      .datapath_pc_set_val_in(pc_set_val_wire),
+      .datapath_pc_src_in(pc_src_wire),
+      .datapath_ir_set_val_in(ir_set_val_wire)
     );
+
 
   CONTROL control_unit0(
       .control_unit_clock_in(<clock>),
