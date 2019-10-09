@@ -15,16 +15,29 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module Core101_top(
-  // CLOCK
-  input CLOCK,
+  // Clock and reset
+  input clock_in,
+  input reset_in,
+
+  // Instruction memory interface
+  output [31:0] ins_mem_addr_out,
+  input [31:0] ins_mem_data_in,
+
+  // Data memory interface
+  output [31:0] data_mem_addr_out,
+  inout [31:0] data_mem_data_inout
 );
 
+
+
   DATAPATH datapath0(
-      .datapath_clock(CLOCK)
+      .datapath_clock_in(<clock>),
+      .datapath_reset_in(<reset>)
     );
 
-  CONTROL control0(
-      .control_clock(CLOCK)
+  CONTROL control_unit0(
+      .control_unit_clock_in(<clock>),
+      .control_unit_reset_in(<reset>)
     );
 
 endmodule
