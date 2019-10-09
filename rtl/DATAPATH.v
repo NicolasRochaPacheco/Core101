@@ -27,11 +27,10 @@ module DATAPATH(
   // CONTROL SIGNALS
   //=========================
 
-  // Program counter
-  input datapath_pc_set_val_in;
-  input [1:0] datapath_pc_src_in;
-
-
+  // Instruction fetch
+  input datapath_pc_set_val_in;     // PC
+  input [1:0] datapath_pc_src_in;   // PC
+  input datapath_ir_set_val_in      // IR
 
 );
 
@@ -42,7 +41,7 @@ module DATAPATH(
 GEN_REG #(.DATA_WIDTH(32)) ir0 (
     .general_register_clock_in(datapath_clock_in),
     .general_register_data_in(datapath_ins_mem_data_in),
-    .general_register_set_in(<from_control_unit>),
+    .general_register_set_in(datapath_ir_set_val_in),
     .general_register_reset_in(datapath_reset_in),
     .general_register_data_out(<to_instruction_decode>)
   );
