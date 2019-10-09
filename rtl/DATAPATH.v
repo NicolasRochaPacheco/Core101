@@ -15,17 +15,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module DATAPATH(
-    // CLOCK, RESET
-    input datapath_clock_in,
-    input datapath_reset_in,
+  // Clock and reset
+  input datapath_clock_in,
+  input datapath_reset_in,
 
-    // INPUTS
-    input [31:0] datapath_ins_mem_data,
+  // Instruction memory interface
+  input [31:0] datapath_ins_mem_data_in,
+  output [31:0] datapath_ins_mem_addr_out
 
-    // OUTPUTS
-    output [31:0] datapath_ins_mem_addr
-  );
+  //=========================
+  // CONTROL SIGNALS
+  //=========================
 
+  // Program counter
+  input datapath_pc_set_val_in;
+  input [1:0] datapath_pc_src_in;
+
+
+
+);
 
 //=====================================
 // Instruction fetch instances
@@ -33,7 +41,7 @@ module DATAPATH(
 // Instruction register
 GEN_REG #(.DATA_WIDTH(32)) ir0 (
     .general_register_clock_in(datapath_clock_in),
-    .general_register_data_in(datapath_ins_mem_data),
+    .general_register_data_in(datapath_ins_mem_data_in),
     .general_register_set_in(<from_control_unit>),
     .general_register_reset_in(datapath_reset_in),
     .general_register_data_out(<to_instruction_decode>)
@@ -45,7 +53,7 @@ GEN_REG #(.DATA_WIDTH(32)) pc0 (
     .general_register_data_in(<from_ins_mem_interface>),
     .general_register_set_in(<from_control_unit>),
     .general_register_reset_in(datapath_reset_in),
-    .general_register_data_out(datapath_ins_mem_addr)
+    .general_register_data_out(datapath_ins_mem_addr_out)
   );
 
 
