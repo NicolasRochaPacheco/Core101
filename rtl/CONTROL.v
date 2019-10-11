@@ -1,4 +1,4 @@
-// General register module definition
+// Control unit module definition
 // Copyright (C) 2019 Nicolas Rocha Pacheco
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,15 +21,16 @@ module CONTROL(
     input control_unit_reset_in,
 
     // Instruction fetch control signals
-    output pc_set_val_out,
-    output [1:0] pc_src_out,
-    output ir_set_val_out
+    output pc_set_val_out,    // PC
+    output [1:0] pc_src_out,  // PC
+    output ir_set_val_out     // IR
 );
 
   // REGISTER DEFINITION
   reg [3:0] state_reg;  // State register used for pipeline staging
                         // Status:  IF (3'b000), ID (3'b001), EX (3'b011),
                         //          MEM (3'b010), WB (3'b110)
+
 
   // Program counter control signal registers
   reg pc_set_val_reg;
