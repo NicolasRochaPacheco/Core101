@@ -1,4 +1,4 @@
-// General register module definition
+// 4-1 multiplexer module definition
 // Copyright (C) 2019 Nicolas Rocha Pacheco
 //
 // This program is free software: you can redistribute it and/or modify
