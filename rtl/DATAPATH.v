@@ -25,15 +25,17 @@ module DATAPATH(
 
   // CONTROL SIGNALS
   // Instruction fetch
-  input datapath_pc_set_val_in,     // PC
-  input [1:0] datapath_pc_src_in,   // PC
-  input datapath_ir_set_val_in,     // IR
-  input [1:0] pc_mux_sel_in         // PC SRC MUX
+  input datapath_pc_set_val_in,       // PC
+  input datapath_ir_set_val_in,       // IR
+  input [1:0] datapath_pc_mux_sel_in  // PC SRC MUX
 
 );
 
 // WIRE DEFINITION
-wire [32:0] pc_data_src_wire;
+// Instruction fetch
+wire [31:0] pc_data_src_wire;
+wire [31:0] pc_stored_val_wire;
+wire [31:0] pc_incremented_wire;
 
 //=====================================
 // Instruction fetch instances
@@ -44,30 +46,35 @@ GEN_REG #(.DATA_WIDTH(32)) ir0 (
     .general_register_data_in(datapath_ins_mem_data_in),
     .general_register_set_in(datapath_ir_set_val_in),
     .general_register_reset_in(datapath_reset_in),
-    .general_register_data_out(<to_instruction_decode>)
+    .general_register_data_out(<to_instruction_decode_unit>)
   );
 
 // Program counter
 GEN_REG #(.DATA_WIDTH(32)) pc0 (
     .general_register_clock_in(datapath_clock_in),
-    .general_register_data_in(<from_pc_src_mux>),
-    .general_register_set_in(<from_control_unit>),
+    .general_register_data_in(pc_data_src_wire),
+    .general_register_set_in(datapath_pc_set_val_in),
     .general_register_reset_in(datapath_reset_in),
-    .general_register_data_out(datapath_ins_mem_addr_out)
+    .general_register_data_out(pc_stored_val_wire)
   );
 
 // PC source multiplexer
 GEN_MUX_4 #(.DATA_WIDTH(32)) pc_mux0 (
     .mux_four_sel_in(pc_mux_sel_in),
-    .mux_four_zero_in(<>),
-    .mux_four_one_in(<>),
-    .mux_four_two_in(<>),
-    .mux_four_three_in(<>),
+    .mux_four_zero_in(pc_incremented_wire),   // PC + 4
+    .mux_four_one_in(<from_pc_offset_unit>),  // PC + offset
+    .mux_four_two_in(<new_pc_addr>),          // new PC
+    .mux_four_three_in(),                     // Not implemented
     .mux_output_out(pc_data_src_wire)
   );
 
+// PC incrementer
+PC_INC #(.DATA_WIDTH(32)) pc_inc0 (
+    .pc_inc_value_in(pc_stored_val_wire),
+    .pc_inc_incremented_val_out(pc_incremented_wire)
+  );
 
 
-
+assign datapath_ins_mem_addr_out = pc_stored_val_wire;
 
 endmodule

@@ -21,9 +21,11 @@ module CONTROL(
     input control_unit_reset_in,
 
     // Instruction fetch control signals
-    output pc_set_val_out,    // PC
-    output [1:0] pc_src_out,  // PC
-    output ir_set_val_out     // IR
+    output control_unit_pc_set_val_out,     // PC reg set
+    output control_unit_ir_set_val_out,     // IR reg set
+    output control_unit_pc_mux_sel_out,      // PC src mux sel
+
+    input [6:0] control_unit_ins_data
 );
 
   // REGISTER DEFINITION
@@ -31,14 +33,10 @@ module CONTROL(
                         // Status:  IF (3'b000), ID (3'b001), EX (3'b011),
                         //          MEM (3'b010), WB (3'b110)
 
-
-  // Program counter control signal registers
+  // Instruction fetch control signal registers
   reg pc_set_val_reg;
-  reg [1:0] pc_src_reg;
-
-  // Instruction register control signal registers
   reg ir_set_val_reg;
-
+  reg pc_mux_sel_reg;
 
 
   always @ (negedge datapath_clock_in, posedge datapath_reset_in)
@@ -50,13 +48,11 @@ module CONTROL(
       // State machine control
       case (state_reg)
         3'b000: begin // IF
-                  // Program counter
                   pc_set_val_reg = 1'b0;
-                  pc_src_reg = 2'b00;
-                  // Instruction register
                   ir_set_val_reg = 1'b1;
+                  pc_mux_sel_reg = 2'b00;
 
-                  // Update state register
+
                   state_reg = 3'b001;
                 end
         3'b001: begin // ID
@@ -82,12 +78,10 @@ module CONTROL(
       endcase
     end
 
-
-    // Program counter control signals
-    assign pc_set_val_out = pc_set_val_reg;
-    assign pc_src_out = pc_src_reg;
-
-    // Instrucion register
-    assign ir_set_val_out = ir_set_val_reg;
+    // OUTPUT
+    // Instruction fetch
+    assign control_unit_pc_set_val_out = pc_set_val_reg;
+    assign control_unit_ir_set_val_out = ir_set_val_reg;
+    assign control_unit_pc_mux_sel_out = pc_mux_sel_reg;
 
 endmodule
