@@ -1,13 +1,14 @@
 # Makefile for Core101
+include sources.list
 
+# Required programs for synthesis and compilation
+IVERILOG = iverilog
 
 MAIN_PATH = $(HOME)/L0G1C101/Core101
 RTL_PATH = $(MAIN_PATH)/rtl
+SYNTH_OUT_PATH = $(MAIN_PATH)/synth_out
 
 
-VERILOG_FILES = $(RTL_PATH)/CPU.v 						\
-								$(RTL_PATH)/CONTROL.v					\
-								$(RTL_PATH)/DATAPATH.v				\
-								$(RTL_PATH)/if/PC_INC.v				\		# Instruction fetch modules
-								$(RTL_PATH)/misc/GEN_REG.v 		\   # Miscelaneous modules
-								$(RTL_PATH)/misc/GEN_MUX_4.v			#
+iverilog:
+	mkdir -p $(SYNTH_OUT_PATH)
+	$(IVERILOG) -o $(SYNTH_OUT_PATH)/core 
