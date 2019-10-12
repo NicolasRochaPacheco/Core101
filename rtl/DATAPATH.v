@@ -27,7 +27,10 @@ module DATAPATH(
   // Instruction fetch
   input datapath_pc_set_val_in,       // PC
   input datapath_ir_set_val_in,       // IR
-  input [1:0] datapath_pc_mux_sel_in  // PC SRC MUX
+  input [1:0] datapath_pc_mux_sel_in, // PC mux src sel
+  // Instruction decode
+  input datapath_imm_gen_type_in,     // IMM type
+  input datapath_imm_mux_src_sel_in   // IMM mux src sel
 
 );
 
@@ -74,6 +77,21 @@ PC_INC #(.DATA_WIDTH(32)) pc_inc0 (
     .pc_inc_incremented_val_out(pc_incremented_wire)
   );
 
+//=====================================
+// Instruction decode instances
+//=====================================
+
+GPR #(.DATA_WIDTH(32)) gpr0 (
+
+  );
+
+IMM_GEN #(.DATA_WIDTH(32)) imm_gen0 (
+
+  );
+
+GEN_MUX_2 #(.DATA_WIDTH(32)) imm_mux0 (
+
+  );
 
 assign datapath_ins_mem_addr_out = pc_stored_val_wire;
 
