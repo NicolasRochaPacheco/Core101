@@ -17,7 +17,8 @@
 
 
 module IMM_GEN(
-  input   [31:0]  ins_input,
+  input [2:0] imm_gen_unit_type_in,
+  input [31:0]  ins_input,
   output  [31:0]  imm_value_output
 );
 
