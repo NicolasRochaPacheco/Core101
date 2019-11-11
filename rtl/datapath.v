@@ -25,7 +25,8 @@ module DATAPATH(
   output [31:0] datapath_ins_mem_addr_out,
 
   // Data memory interface
-  inout [31:0] datapath_data_mem_data_inout,
+  input  [31:0] datapath_data_mem_data_in,
+  output [31:0] datapath_data_mem_data_out,
   output [31:0] datapath_data_mem_addr_out,
 
   // Instruction fetch control signals
@@ -145,6 +146,6 @@ GEN_MUX_2 #(.DATA_WIDTH(32)) imm_mux0 (
 // Register writeback instances
 //=====================================
 
-assign datapath_ins_mem_addr_out = pc_stored_val_wire;
+assign datapath_ins_mem_addr_out = pc_stored_value_wire;
 
 endmodule
