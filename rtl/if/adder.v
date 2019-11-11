@@ -1,4 +1,4 @@
-// Progam counter incrementer module definition
+// Adder module definition
 // Copyright (C) 2019 Nicolas Rocha Pacheco
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,12 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-module PC_INC #(parameter DATA_WIDTH=32) (
-    input [DATA_WIDTH-1:0] pc_inc_value_in,
-    output [DATA_WIDTH-1:0] pc_inc_incremented_val_out
+module ADDER
+  #(parameter DATA_WIDTH=64)(
+    // Adder A data input
+    input [DATA_WIDTH-1:0] adder_A_data_in,
+    // Adder B data input
+    input [DATA_WIDTH-1:0] adder_B_data_in,
+    // Adder data output
+    output [DATA_WIDTH-1:0] adder_data_out
   );
 
-  assign pc_inc_incremented_val_out = pc_inc_value_in + 4;
+  // Combinational logic
+  assign adder_data_out = adder_A_data_in + adder_B_data_in
 
-endmodule
+endmodule // ADDER
