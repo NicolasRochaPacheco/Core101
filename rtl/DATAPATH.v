@@ -52,7 +52,7 @@ wire [63:0] pc_increment_adder_wire;
 wire [63:0] pc_offset_adder_wire;
 wire [63:0] pc_new_value_wire;
 wire [63:0] pc_output_wire;
-wire [63:0] ir_stored_value_wire;
+wire [31:0] ir_stored_value_wire;
 
 // Instruction decode wire definition
 // Execute wire definition
