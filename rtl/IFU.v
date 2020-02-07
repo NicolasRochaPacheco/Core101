@@ -87,50 +87,39 @@ MUX_B #(.DATA_WIDTH(32)) pc_src_mux (
 	.data_sel_in(pc_src_mux_ctrl_in),
 
 	// Data outputs
-	.data_out(pc_src_mux_wire),
+	.data_out(pc_src_mux_wire)
 );
 
 REG #(.DATA_WIDTH(32)) pc (
 	// Clock and reset inputs
-	.clock_in(),
-	.reset_in()
+	.clock_in(ifu_clock_in),
+	.reset_in(ifu_reset_in),
 
 	// Data inputs
-	.data_in(),
-	.set_in(),
+	.data_in(pc_src_mux_wire),
+	.set_in(pc_set_ctrl_in),
 
 	// Data outputs
-	.data_out()
+	.data_out(pc_stored_val_wire)
 );
 
 REG #(.DATA_WIDTH(32)) ir (
 	// Clock and reset inputs
-	.clock_in(),
-	.reset_in(),
+	.clock_in(ifu_clock_in),
+	.reset_in(ifu_reset_in),
 
 	// Data inputs
-	.data_in(),
+	.data_in(ins_mem_fetched_ins_wire),
 
 	// Control inputs
-	.set_in(),
+	.set_in(ir_set_ctrl_in),
 
 	// Data outputs
-	.data_out()
+	.data_out(ir_stored_val_out)
 );
 
 INS_CACHE_CONTROLLER #(.DATA_WIDTH(32)) ins_cache_controller (
-	// Data inputs
-	.addr_in(),
-
-	// Control inputs
-	.valid_in(),
-
-	// Data outputs
-	.data_out()
-
-	// Control outputs
-	.hit_out(),
-	.ready_out(),
+	// TBD
 );
 
 
@@ -139,4 +128,4 @@ INS_CACHE_CONTROLLER #(.DATA_WIDTH(32)) ins_cache_controller (
 //-----------------------------------------------
 
 
-endmodule
+endmodule // IFU
