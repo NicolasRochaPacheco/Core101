@@ -19,7 +19,7 @@
 //  MODULE DEFINITION
 //-----------------------------------------------
 module IFU (
-	
+
 	// Clock and reset input
 	input ifu_clock_in,
 	input ifu_reset_in,
@@ -44,6 +44,7 @@ module IFU (
 
 );
 
+
 //-----------------------------------------------
 //  WIRE DEFINITION
 //-----------------------------------------------
@@ -58,53 +59,84 @@ wire [31:0] ins_mem_fetched_ins_wire;
 //  MODULES INSTANTIATION
 //-----------------------------------------------
 ADDER #(.DATA_WIDTH(32)) offset_adder (
-	.a_operand_in(),
-	.b_operand_in(),
-	.add_result_out()
+	// Data inputs
+	.a_operand_in(pc_offset_in),
+	.b_operand_in(pc_stored_val_wire),
+
+	// Data outputs
+	.add_result_out(pc_offset_adder_wire)
 );
 
 ADDER #(.DATA_WIDTH(32)) inc_adder (
-	.a_operand_in(),
-	.b_operand_in(),
-	.add_result_out()
+	// Data inputs
+	.a_operand_in(32'h00000004),
+	.b_operand_in(pc_stored_val_wire),
+
+	// Data outputs
+	.add_result_out(pc_inc_adder_wire)
 );
 
 MUX_B #(.DATA_WIDTH(32)) pc_src_mux (
-	.a_data_src_in(),
-	.b_data_src_in(),
-	.c_data_src_in(),
-	.d_data_src_in(),
-	.data_sel_in(),
-	.data_out(),
+	// Data inputs
+	.a_data_src_in(pc_upd_addr_in),
+	.b_data_src_in(pc_offset_adder_wire),
+	.c_data_src_in(pc_inc_adder_wire),
+	.d_data_src_in(32'h00000000),
+
+	// Control inputs
+	.data_sel_in(pc_src_mux_ctrl_in),
+
+	// Data outputs
+	.data_out(pc_src_mux_wire),
 );
 
 REG #(.DATA_WIDTH(32)) pc (
+	// Clock and reset inputs
 	.clock_in(),
 	.reset_in()
-	.set_in(),
+
+	// Data inputs
 	.data_in(),
+	.set_in(),
+
+	// Data outputs
 	.data_out()
 );
 
 REG #(.DATA_WIDTH(32)) ir (
+	// Clock and reset inputs
 	.clock_in(),
-	.reset_in()
-	.set_in(),
+	.reset_in(),
+
+	// Data inputs
 	.data_in(),
+
+	// Control inputs
+	.set_in(),
+
+	// Data outputs
 	.data_out()
 );
 
-CACHE #(.DATA_WIDTH(32)) ins_cache (
-	.valid_in(),
+INS_CACHE_CONTROLLER #(.DATA_WIDTH(32)) ins_cache_controller (
+	// Data inputs
 	.addr_in(),
+
+	// Control inputs
+	.valid_in(),
+
+	// Data outputs
+	.data_out()
+
+	// Control outputs
 	.hit_out(),
 	.ready_out(),
-	.data_out()
 );
 
 
 //-----------------------------------------------
 // OUTPUT LOGIC
 //-----------------------------------------------
+
 
 endmodule
