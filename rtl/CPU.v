@@ -33,8 +33,30 @@ module Core101_top(
 //-----------------------------------------------
 // MAIN UNITS
 //-----------------------------------------------
-IFU #(.PARAM(1)) ifu0 (
-  .input_x()
+IFU ifu0 (
+
+  // Clock and reset input
+  .ifu_clock_in(clock_in),
+  .ifu_reset_in(reset_in),
+
+  // Data inputs
+  .pc_upd_addr_in(),
+  .pc_offset_in(),
+
+  // Control inputs
+  .pc_set_ctrl_in(),
+  .pc_src_mux_ctrl_in(),
+  .ins_mem_valid_ctrl_in(),
+  .ir_set_ctrl_in(),
+
+  // Data outputs
+  .pc_stored_val_out(),
+  .ir_stored_val_out(),
+
+  // Control outputs
+  .ins_mem_ready_out(),
+  .ins_mem_hit_out()
+
 );
 
 
