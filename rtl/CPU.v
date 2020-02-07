@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module Core101_top(
+
   // Clock and reset
   input clock_in,
   input reset_in,
@@ -26,33 +27,16 @@ module Core101_top(
   // Data memory interface
   output [31:0] data_mem_addr_out,
   inout [31:0] data_mem_data_inout
+
 );
 
-  //=========================
-  // WIRE DEFINITION
-  //=========================
-  // Instruction fetch control signal wires
-  wire pc_set_val_wire;     // PC
-  wire ir_set_val_wire;     // IR
-  wire [1:0] pc_mux_sel_wire;
+//-----------------------------------------------
+// MAIN UNITS
+//-----------------------------------------------
+IFU #(.PARAM(1)) ifu0 (
+  .input_x()
+);
 
 
-  DATAPATH datapath0(
-      .datapath_clock_in(clock_in),
-      .datapath_reset_in(reset_in),
-
-      .datapath_ins_mem_addr_out(ins_mem_addr_out),
-      .datapath_ins_mem_data_in(ins_mem_data_in),
-
-      .datapath_pc_set_val_in(pc_set_val_wire),
-      .datapath_ir_set_val_in(ir_set_val_wire),
-      .datapath_pc_mux_sel_in()
-    );
-
-
-  CONTROL control_unit0(
-      .control_unit_clock_in(clock_in),
-      .control_unit_reset_in(reset_in)
-    );
 
 endmodule
