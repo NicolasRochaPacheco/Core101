@@ -16,6 +16,7 @@
 
 // A state machine that will control how the datapath behaves :)
 module CONTROL(
+  
     // Clock and reset
     input control_unit_clock_in,
     input control_unit_reset_in,
@@ -23,9 +24,17 @@ module CONTROL(
     // Instruction fetch control signals
     output control_unit_pc_set_val_out,     // PC reg set
     output control_unit_ir_set_val_out,     // IR reg set
-    output control_unit_pc_mux_sel_out,      // PC src mux sel
+    output [1:0] control_unit_pc_mux_sel_out,      // PC src mux sel
+    input [6:0] control_unit_ins_data_in
 
-    input [6:0] control_unit_ins_data
+    // Instruction decode control signals
+
+    // Execute control signals
+
+    // Memory access control signals
+
+    // Register writeback control signals
+
 );
 
   // REGISTER DEFINITION

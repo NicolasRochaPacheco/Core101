@@ -22,12 +22,12 @@ module DATAPATH(
 
   // Instruction memory interface
   input [31:0] datapath_ins_mem_data_in,
-  output [31:0] datapath_ins_mem_addr_out,
+  output [63:0] datapath_ins_mem_addr_out,
 
   // Data memory interface
-  input  [31:0] datapath_data_mem_data_in,
-  output [31:0] datapath_data_mem_data_out,
-  output [31:0] datapath_data_mem_addr_out,
+  input  [63:0] datapath_data_mem_data_in,
+  output [63:0] datapath_data_mem_data_out,
+  output [63:0] datapath_data_mem_addr_out,
 
   // Instruction fetch control signals
   input datapath_pc_set_val_in,       // PC
@@ -47,13 +47,13 @@ module DATAPATH(
 );
 
 // Instruction fetch wire definition
-wire [63:0] pc_update_value_wire;
+wire [63:0] pc_update_value_wire;       // PC REG
 wire [63:0] pc_stored_value_wire;
-wire [63:0] pc_increment_adder_wire;
+wire [63:0] pc_increment_adder_wire;    // PC SRC MUX
 wire [63:0] pc_offset_adder_wire;
 wire [63:0] pc_new_value_wire;
 wire [63:0] pc_output_wire;
-wire [31:0] ir_stored_value_wire;
+wire [31:0] ir_stored_value_wire;       // IR REG
 
 // Instruction decode wire definition
 // Execute wire definition
@@ -74,7 +74,7 @@ GEN_REG #(.DATA_WIDTH(32)) ir0 (
   );
 
 // Program counter (CHECKED)
-GEN_REG #(.DATA_WIDTH(32)) pc0 (
+GEN_REG #(.DATA_WIDTH(64)) pc0 (
     .general_register_clock_in(datapath_clock_in),
     .general_register_data_in(pc_update_value_wire),
     .general_register_set_in(datapath_pc_set_val_in),
@@ -83,7 +83,7 @@ GEN_REG #(.DATA_WIDTH(32)) pc0 (
   );
 
 // PC source multiplexer (CHECKED)
-GEN_MUX_4 #(.DATA_WIDTH(32)) pc_mux0 (
+GEN_MUX_4 #(.DATA_WIDTH(64)) pc_mux0 (
     .mux_four_sel_in(pc_mux_sel_in),            // From Control Unit
     .mux_four_zero_in(pc_increment_adder_wire), // PC + 4
     .mux_four_one_in(pc_offset_adder_wire),     // PC + offset

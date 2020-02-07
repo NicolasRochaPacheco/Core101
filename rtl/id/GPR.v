@@ -1,4 +1,4 @@
-// Immediate generator module for Core101
+// General purpose registers module definition
 // Copyright (C) 2019 Nicolas Rocha Pacheco
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,13 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+module GPR();
 
-
-module IMM_GEN(
-  input [6:0] imm_gen_unit_type_in,
-  input [31:7]  imm_gen_unit_ins_in,
-  output  [31:0]  imm_gen_unit_imm_out
-);
-
-
-endmodule
+endmodule // GPR

@@ -1,4 +1,4 @@
-// ALU module for Core101
+// ALU module definition
 // Copyright (C) 2019 Nicolas Rocha Pacheco
 //
 // This program is free software: you can redistribute it and/or modify

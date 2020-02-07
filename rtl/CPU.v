@@ -31,10 +31,10 @@ module Core101_top(
   //=========================
   // WIRE DEFINITION
   //=========================
-  // Instruction fetch
+  // Instruction fetch control signal wires
   wire pc_set_val_wire;     // PC
   wire ir_set_val_wire;     // IR
-  wire
+  wire [1:0] pc_mux_sel_wire;
 
 
   DATAPATH datapath0(
