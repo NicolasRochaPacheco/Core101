@@ -1,14 +1,13 @@
 # Makefile for Core101
-include sources.list
 
 # Required programs for synthesis and compilation
-IVERILOG = iverilog
+VERILATOR = verilator
 
-MAIN_PATH = $(HOME)/L0G1C101/Core101
-RTL_PATH = $(MAIN_PATH)/rtl
-SYNTH_OUT_PATH = $(MAIN_PATH)/synth_out
+# Verilog source files
+RTL_FILES = rtl/misc/ADDER.v
 
+Core101:
+	@$(VERILATOR) -Wall --cc $(RTL_FILES)
 
-iverilog:
-	mkdir -p $(SYNTH_OUT_PATH)
-	$(IVERILOG) -o $(SYNTH_OUT_PATH)/core 
+clean:
+	@rm -r obj_dir
