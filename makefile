@@ -3,11 +3,19 @@
 # Required programs for synthesis and compilation
 VERILATOR = verilator
 
+# Repo path
+RPATH = $(HOME)/L0G1C101/Core101
+
 # Verilog source files
-RTL_FILES = rtl/misc/ADDER.v
+VPATH = $(RPATH)/rtl/misc/ADDER.v
+
+CPATH = $(RPATH)/src/adder_testbench.cpp
+
 
 Core101:
-	@$(VERILATOR) -Wall --cc $(RTL_FILES)
+	echo 'Building Core101'
+	@$(VERILATOR) -Wall --cc $(VPATH) --exe $(CPATH)
+	@make -j -C obj_dir -f VADDER.mk VADDER
 
 clean:
 	@rm -r obj_dir
