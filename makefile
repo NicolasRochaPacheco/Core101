@@ -3,13 +3,10 @@
 # Required programs for synthesis and compilation
 VERILATOR = verilator
 
-# Repo path
-RPATH = $(HOME)/L0G1C101/Core101
-
 # Verilog source files
-VPATH = $(RPATH)/rtl/misc/ADDER.v
+VPATH = /rtl/misc/ADDER.v
 
-CPATH = $(RPATH)/src/adder_testbench.cpp
+CPATH = /src/adder_testbench.cpp
 
 
 Core101:
