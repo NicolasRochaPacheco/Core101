@@ -26,7 +26,6 @@ module ADDER #(parameter DATA_WIDTH=32)(
 
   // Data outputs
   output [DATA_WIDTH-1:0] add_result_out
-
 );
 
 
