@@ -10,17 +10,9 @@ Another advantage of using Docker is portability. A Docker just needs a Dockerfi
 After explaining why we use Docker for hardware development, we would like to provide an installation reference. Here we have some common steps on installing Docker with some warnings. Those warnings come from our experience after reinstalling Linux a couple of times. To install Docker, you have to execute:
 
     $ sudo apt-get update
-    $ sudo apt-get 	install \
-    				apt-transport-https \
-    				ca-certificates \
-    				curl \
-    				gnupg-agent \
-    				software-properties-common
+    $ sudo apt-get 	install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
     $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    $ sudo add-apt-repository \
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) \
-        stable"
+    $ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     $ sudo apt-get update
     $ sudo apt-get install docker-ce docker-ce-cli containerd.io
 
@@ -30,7 +22,8 @@ The previous commands come from the Ubuntu [Docker documentation](https://docs.d
     $ sudo usermod -aG docker $USER
     $ newgrp docker
 
-As the installation commands, those commands come from Ubuntu [Docker documentation](https://docs.docker.com/install/linux/linux-postinstall/). We ivite you to check your OS documentation if you are not using Ubuntu. We also encourage you to check the documentation if any error shows up during the installation process.
+As the installation commands, those commands come from Ubuntu [Docker documentation](https://docs.docker.com/install/linux/linux-postinstall/). We invite you to check your OS documentation if you are not using Ubuntu. We also encourage you to check the documentation if any error shows up during the installation process.
 
-
+## Building the Core101 image
+TBW (To be written)
 
