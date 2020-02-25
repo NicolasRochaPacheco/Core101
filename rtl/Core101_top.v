@@ -15,50 +15,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module Core101_top(
-
   // Clock and reset
   input clock_in,
   input reset_in,
 
-  // Instruction memory interface
-  output [31:0] ins_mem_addr_out,
-  input [31:0] ins_mem_data_in,
-
-  // Data memory interface
-  output [31:0] data_mem_addr_out,
-  inout [31:0] data_mem_data_inout
-
+  // Memory interfaces
+  inout mem_addr_inout,
+  inout mem_data_inout,
+  output mem_read_out,
+  input mem_valid_in
 );
 
-//-----------------------------------------------
-// MAIN UNITS
-//-----------------------------------------------
-IFU ifu0 (
 
-  // Clock and reset input
-  .ifu_clock_in(clock_in),
-  .ifu_reset_in(reset_in),
-
-  // Data inputs
-  .pc_upd_addr_in(),
-  .pc_offset_in(),
-
-  // Control inputs
-  .pc_set_ctrl_in(),
-  .pc_src_mux_ctrl_in(),
-  .ins_mem_valid_ctrl_in(),
-  .ir_set_ctrl_in(),
-
-  // Data outputs
-  .pc_stored_val_out(),
-  .ir_stored_val_out(),
-
-  // Control outputs
-  .ins_mem_ready_out(),
-  .ins_mem_hit_out()
-
-);
-
+assign mem_read_out = 1'b1;
 
 
 endmodule
