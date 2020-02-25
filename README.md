@@ -9,7 +9,7 @@ Core101 is an in-order RISC-V core, that features a five-stage pipeline that res
 ## Docker
 Core101 is intended to run within a Docker container, in order to keep all dependencies and prerrequisites in an isolated virtual environment. Nevertheless, if you have the requiered software installed on your machine there is no reason for Core101 coming up with errors, unless it is a matter of source code, in which case we apologize beforehand.
 
-We strongly recommend you using Docker to synthetize and test our code. Please check the [Core101 Docker documentation](https://github.com/NicolasRochaPacheco/Core101/blob/master/docker/README.md) if you want to use our Dockerfile. All console commands from Core101 documentation are intended to be run on a Docker container unless otherwise stated.
+We strongly recommend you using Docker to synthetize and test our code. Please check the [Core101 Docker documentation](https://github.com/NicolasRochaPacheco/Core101/blob/master/docker) if you want to use our Dockerfile. All console commands from Core101 documentation are intended to be run on a Docker container unless otherwise stated.
 
 ## Synthetization
 Synthetization of Core101 is done with [Verilator](https://www.veripool.org/projects/verilator/wiki/Intro) and testbenches are written in C++. We are looking forward to test Core101 with RISC-V tests to ensure that ISA is supported properly.
