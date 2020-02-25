@@ -7,7 +7,7 @@ One of the motivations on doing this project was creating a beginner-friendly RI
 Another advantage of using Docker is portability. A Docker just needs a Dockerfile to build the environment with all dependencies and prerrequisites installed, so we can ensure that everything will work properly. This portability is very useful when showing your progress to your advisor. There are less chances that your laptop will freeze on his/her office, or the synthetization will come up with and error after installing some pip packages just before your meeting.
 
 ## Docker installation
-After explaining why we use Docker for hardware development, we would like to provide an installation reference. Here we have some common steps on installing Docker with some warnings. Those warnings come from our experience after reinstalling Linux a couple of times. To install Docker, you have to execute:
+After explaining why we use Docker for hardware development, we would like to provide an installation reference. Here we have some common steps on installing Docker:
 
     $ sudo apt-get update
     $ sudo apt-get 	install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
