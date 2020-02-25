@@ -22,8 +22,23 @@ The previous commands come from the Ubuntu [Docker documentation](https://docs.d
     $ sudo usermod -aG docker $USER
     $ newgrp docker
 
-As the installation commands, those commands come from Ubuntu [Docker documentation](https://docs.docker.com/install/linux/linux-postinstall/). We invite you to check your OS documentation if you are not using Ubuntu. We also encourage you to check the documentation if any error shows up during the installation process.
+As the installation commands, those commands come from Ubuntu [Docker documentation](https://docs.docker.com/install/linux/linux-postinstall/). We invite you to check your OS documentation if you are not using Ubuntu. We also encourage you to check the documentation if any error shows up during the installation process. To test if Docker was installed successfully do:
+
+    $ docker run hello-world
+
+If the previous command shows a Hello World! on the console output, Docker was installed succesfully. Add `sudo` if you are still using root permisions with Docker.
 
 ## Building the Core101 image
-TBW (To be written)
+As Docker is installed, you should build the Docker image to synthetize and run Core101 tests. To build the Docker image execute the following commands. Please make sure that this folder is your current directory.
 
+    $ docker build -t core101:latest .
+
+Once the image is built, you have to create a new container from the image. When you use the `run` command in Docker it creates a new containter, so it must be used only once.
+
+    $ docker run -it --name core101 core101:latest
+
+As the container is started a bash console is executed. To exit the container just use the `exit` command, all the changes will be saved. To restart the container after exiting, use:
+
+    $ docker start -ai core101 
+
+Again, do not use the `run` command attempting to restart a container.
