@@ -24,3 +24,4 @@ RUN git clone https://github.com/NicolasRochaPacheco/Core101.git
 
 # Gets back to root folder
 WORKDIR /
+RUN echo 'Image built successfully'
