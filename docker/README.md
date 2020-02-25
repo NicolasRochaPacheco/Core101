@@ -41,4 +41,6 @@ As the container is started a bash console is executed. To exit the container ju
 
     $ docker start -ai core101 
 
-Again, do not use the `run` command attempting to restart a container.
+Again, do not use the `run` command attempting to restart a container. To remove the container, use:
+
+    $ docker container rm core101
