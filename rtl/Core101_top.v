@@ -20,15 +20,19 @@ module Core101_top(
   input clock_in,
   input reset_in,
 
-  // Halt signal
-  input halt_in, // Will be deprecated as the control unit is finished
-
-  // GPR outputs
+  // ================================================================
+  // Debug_signals. Will be deprecated as the core is finished
+  // ================================================================
+  input halt_in,
+  output [2:0] exec_unit_sel_out,
   output [4:0] gpr_a_out,
   output [4:0] gpr_b_out,
+  output [4:0] gpr_rd_out,
+  // ================================================================
 
   // Ins. mem. interface
   output [31:0] ins_mem_addr_out,
+  output [31:0] ins_data_out,
 
   // Memory interfaces
   inout mem_addr_inout,
@@ -43,14 +47,24 @@ wire ir_set_wire;
 
 wire [31:0] pc_addr_wire;
 wire [31:0] ir_data_wire;
+wire [31:0] ins_mem_data_wire;
 
+wire [2:0] exec_unit_sel_wire;
 
 wire [4:0] gpr_a_wire;
 wire [4:0] gpr_b_wire;
+wire [4:0] gpr_rd_wire;
 
 //==============================
 // INSTANCE DEFINITION
 //==============================
+
+// Main memory definition
+MAIN_MEMORY mem0(
+  .main_mem_addr_in(pc_addr_wire),
+  .main_mem_data_out(ins_mem_data_wire)
+);
+
 // Instruction fetch unit module
 IFU ifu0(
  .ifu_clock_in(clock_in),
@@ -59,7 +73,7 @@ IFU ifu0(
  .pc_addr_in(32'h00000000),
  .pc_offset_in(32'h0000008),
 
- .ir_data_in(32'h00410333),
+ .ir_data_in(ins_mem_data_wire),
  .pc_addr_out(pc_addr_wire),
  .ir_data_out(ir_data_wire),
 
@@ -86,15 +100,21 @@ IFU_CONTROL ifu_ctrl0 (
 DECODE_UNIT decode0 (
   .dec_ins_in(ir_data_wire),
 
+  .exec_unit_sel_out(exec_unit_sel_wire),
+
+  // General purpose registers output
   .dec_gpr_src_a_out(gpr_a_wire),
-  .dec_gpr_src_b_out(gpr_b_wire)
+  .dec_gpr_src_b_out(gpr_b_wire),
+  .dec_gpr_des_out(gpr_rd_wire)
 );
 
 // Main control unit
-
 assign ins_mem_addr_out = pc_addr_wire;
 assign gpr_a_out = gpr_a_wire;
 assign gpr_b_out = gpr_b_wire;
+assign gpr_rd_out = gpr_rd_wire;
+assign ins_data_out = ir_data_wire;
+assign exec_unit_sel_out = exec_unit_sel_wire;
 
 
 endmodule
