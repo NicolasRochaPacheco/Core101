@@ -100,7 +100,7 @@ REG #(.DATA_WIDTH(32)) pc (
 	.data_out(pc_addr_wire)
 );
 
-REG #(.DATA_WIDTH(32)) ir (
+REG_NEG #(.DATA_WIDTH(32)) ir (
 	// Clock and reset inputs
 	.clock_in(ifu_clock_in),
 	.reset_in(ifu_reset_in),
