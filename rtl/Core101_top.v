@@ -28,6 +28,9 @@ module Core101_top(
   output [4:0] gpr_a_out,
   output [4:0] gpr_b_out,
   output [4:0] gpr_rd_out,
+  output [3:0] int_uop_out,
+  output [3:0] vec_uop_out,
+  output [3:0] lsu_uop_out,
   // ================================================================
 
   // Ins. mem. interface
@@ -50,10 +53,15 @@ wire [31:0] ir_data_wire;
 wire [31:0] ins_mem_data_wire;
 
 wire [2:0] exec_unit_sel_wire;
+wire [3:0] exec_unit_uop_wire;
 
 wire [4:0] gpr_a_wire;
 wire [4:0] gpr_b_wire;
 wire [4:0] gpr_rd_wire;
+
+wire [3:0] int_uop_wire;
+wire [3:0] vec_uop_wire;
+wire [3:0] lsu_uop_wire;
 
 //==============================
 // INSTANCE DEFINITION
@@ -103,19 +111,30 @@ DECODE_UNIT decode0 (
   .funct3_in(ir_data_wire[14:12]),
   .funct7_in(ir_data_wire[31:25]),
 
+  // Execution unit selection
+  .exec_unit_sel_out(exec_unit_sel_wire),
+  .exec_unit_uop_out(exec_unit_uop_wire),
+
+  // General purpose registers output
   .rs1_in(ir_data_wire[19:15]),
   .rs2_in(ir_data_wire[24:20]),
   .rd_in(ir_data_wire[11:7]),
-
-  .exec_unit_sel_out(exec_unit_sel_wire),
-
-  // General purpose registers output
   .dec_gpr_src_a_out(gpr_a_wire),
   .dec_gpr_src_b_out(gpr_b_wire),
   .dec_gpr_des_out(gpr_rd_wire)
 );
 
 // Issue unit
+ISSUE_UNIT issue0 (
+  // Execution unit selection bus
+  .exec_unit_sel_in(exec_unit_sel_wire),
+  .exec_uop_in(exec_unit_uop_wire),
+
+  // Execution unit opcodes
+  .int_exec_uop_out(int_uop_wire),
+  .vec_exec_uop_out(vec_uop_wire),
+  .lsu_exec_uop_out(lsu_uop_wire)
+);
 
 // Execution units
 
@@ -129,6 +148,11 @@ assign gpr_b_out = gpr_b_wire;
 assign gpr_rd_out = gpr_rd_wire;
 assign ins_data_out = ir_data_wire;
 assign exec_unit_sel_out = exec_unit_sel_wire;
+
+// uOp codes output
+assign int_uop_out = int_uop_wire;
+assign vec_uop_out = vec_uop_wire;
+assign lsu_uop_out = lsu_uop_wire;
 
 
 endmodule
