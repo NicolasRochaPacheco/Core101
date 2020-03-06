@@ -7,11 +7,14 @@ CUR_DIR = $(shell pwd)
 
 # Verilog source files
 VPATH = $(CUR_DIR)/rtl/Core101_top.v \
-		$(CUR_DIR)/rtl/IFU/IFU.v \
-		$(CUR_DIR)/rtl/IFU/IFU_CONTROL.v \
-		$(CUR_DIR)/rtl/misc/ADDER.v \
-		$(CUR_DIR)/rtl/misc/MUX_B.v \
-		$(CUR_DIR)/rtl/misc/REG.v
+				$(CUR_DIR)/rtl/IFU/IFU.v \
+				$(CUR_DIR)/rtl/IFU/IFU_CONTROL.v \
+				$(CUR_DIR)/rtl/DEC/DECODE_UNIT.v \
+				$(CUR_DIR)/rtl/MEM/MAIN_MEMORY.v \
+				$(CUR_DIR)/rtl/misc/ADDER.v \
+				$(CUR_DIR)/rtl/misc/MUX_B.v \
+				$(CUR_DIR)/rtl/misc/REG.v \
+				$(CUR_DIR)/rtl/misc/REG_NEG.v
 
 CPATH = $(CUR_DIR)/src/core101_testbench.cpp
 
