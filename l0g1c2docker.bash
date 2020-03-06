@@ -1,8 +1,10 @@
 #!/bin/bash
 # l0g1c2docker.bash
 
-tar -czf L0G1C101.tar.gz L0G1C101/
-docker cp L0G1C101.tar.gz core101:/opt/L0G1C101.tar.gz
+
+tar -czf ../../L0G1C101.tar.gz ../../L0G1C101/
+docker cp ../../L0G1C101.tar.gz core101:/opt/L0G1C101.tar.gz
+rm ../../L0G1C101.tar.gz
 
 # Compiles and executes in docker container
 echo "Iniciando el contenedor"

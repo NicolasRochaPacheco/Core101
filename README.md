@@ -19,6 +19,12 @@ Synthetization of Core101 is done with [Verilator](https://www.veripool.org/proj
 
 We will provide two synthetization tests using Verilator, these tests are intended to check that modules can be synthetized. Of course, installation of prerrequisites should not be a problem since we provide a Docker image with all dependencies and requiered files.
 
+To synthetize on the docker container, run the following console command:
+
+    $ source l0g1c2docker.bash
+
+This will run the testbenches on the docker container and output the result on the console. Just make sure that path to Core101 has a parent directory called L0G1C101.
+
 ### Adder test
 To test a single adder, synthetized by Verilator with a testbench consisting of three additions do:
 
