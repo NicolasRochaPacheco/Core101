@@ -20,6 +20,8 @@ RUN apt-get install -y \
 #--------------------------------------
 # Downloads Core101 repository on opt directory
 WORKDIR /opt/
+RUN mkdir L0G1C101
+WORKDIR /opt/L0G1C101/
 RUN git clone https://github.com/NicolasRochaPacheco/Core101.git
 
 # Gets back to root folder
