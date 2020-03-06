@@ -62,6 +62,7 @@ wire [4:0] gpr_rd_wire;
 // Main memory definition
 MAIN_MEMORY mem0(
   .main_mem_addr_in(pc_addr_wire),
+
   .main_mem_data_out(ins_mem_data_wire)
 );
 
@@ -98,7 +99,13 @@ IFU_CONTROL ifu_ctrl0 (
 
 // Main decode unit
 DECODE_UNIT decode0 (
-  .dec_ins_in(ir_data_wire),
+  .opcode_in(ir_data_wire[6:2]),
+  .funct3_in(ir_data_wire[14:12]),
+  .funct7_in(ir_data_wire[31:25]),
+
+  .rs1_in(ir_data_wire[19:15]),
+  .rs2_in(ir_data_wire[24:20]),
+  .rd_in(ir_data_wire[11:7]),
 
   .exec_unit_sel_out(exec_unit_sel_wire),
 
@@ -107,6 +114,13 @@ DECODE_UNIT decode0 (
   .dec_gpr_src_b_out(gpr_b_wire),
   .dec_gpr_des_out(gpr_rd_wire)
 );
+
+// Issue unit
+
+// Execution units
+
+// General purpose registers
+
 
 // Main control unit
 assign ins_mem_addr_out = pc_addr_wire;
