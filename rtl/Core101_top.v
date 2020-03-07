@@ -55,6 +55,9 @@ wire [31:0] ins_mem_data_wire;
 wire [2:0] exec_unit_sel_wire;
 wire [3:0] exec_unit_uop_wire;
 
+wire pc_mux_sel_wire;
+wire imm_mux_sel_wire;
+
 wire [4:0] gpr_a_wire;
 wire [4:0] gpr_b_wire;
 wire [4:0] gpr_rd_wire;
@@ -114,6 +117,12 @@ DECODE_UNIT decode0 (
   // Execution unit selection
   .exec_unit_sel_out(exec_unit_sel_wire),
   .exec_unit_uop_out(exec_unit_uop_wire),
+
+  // PC mux selection signal
+  .pc_mux_sel_out(pc_mux_sel_wire),
+
+  // Immediate value mux selection signal
+  .imm_mux_sel_out(pc_mux_sel_wire),
 
   // General purpose registers output
   .rs1_in(ir_data_wire[19:15]),

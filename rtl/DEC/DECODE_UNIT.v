@@ -54,44 +54,98 @@ module DECODE_UNIT (
 // rd = ins[11:7]
 // ==========================
 
+
+// ====================================
 // Parameter definition
+// ====================================
+// Opcode in possible values
+parameter LOAD = 5'b00000;
+parameter OPIMM = 5'b00100;
+parameter AUIPC = 5'b00101;
+parameter STORE = 5'b01000;
+parameter OP = 5'b01100;
+parameter LUI = 5'b01101;
+parameter BRANCH = 5'b11000;
+parameter JALR = 5'b11001;
+parameter JAL = 5'b11011;
+parameter SYSTEM = 5'b11100;
+parameter OPV = 5'b10101;
+
+// Execution unit selection values
 parameter ALU_EXEC_SEL = 3'b001;
 parameter LSU_EXEC_SEL = 3'b010;
 parameter VEC_EXEC_SEL = 3'b100;
+// ====================================
 
+
+// ====================================
 // Registers definition
+// ====================================
 reg [2:0] exec_sel_reg;
+reg pc_mux_sel_reg;
+reg imm_mux_sel_reg;
+// ====================================
+
 
 // ====================================
 // COMBINATIONAL LOGIC
 // ====================================
 always@(*) begin
-  // Execution unit selection
-  if (opcode_in == 5'b00000 || opcode_in == 5'b01000)
-    exec_sel_reg = LSU_EXEC_SEL;
-  else if (opcode_in == 5'b10101)
-    exec_sel_reg = VEC_EXEC_SEL;
-  else // if (...)
-    exec_sel_reg = ALU_EXEC_SEL;
-  // else
-  //   exec_sel_reg = 3'b000;
+
+  // Execution unit selection.
+  // LSU opcode: LOAD, STORE
+  // INT opcode: E.E.
+  // VEC opcode: OP-V
+  case(opcode_in)
+    LOAD:     exec_sel_reg = LSU_EXEC_SEL;
+    STORE:    exec_sel_reg = LSU_EXEC_SEL;
+    OPV:      exec_sel_reg = VEC_EXEC_SEL;
+    default:  exec_sel_reg = 3'b000; // No opcode identified. Raises exception
+  endcase
 
   // uOp generation
 
-  // Will use PC value?
+  // Will use PC value? opcodes: AUIPC, JAL, JALR, BRANCH
+  case(opcode_in)
+    AUIPC:    pc_mux_sel_reg = 1'b1;
+    JAL:      pc_mux_sel_reg = 1'b1;
+    JALR:     pc_mux_sel_reg = 1'b1;
+    BRANCH:   pc_mux_sel_reg = 1'b1;
+    default:  pc_mux_sel_reg = 1'b0;
+  endcase
 
-  // Will use an immediate value?
-
+  // Will use an immediate value? opcodes: LOAD, STORE, OP-IMM, JAL, JALR, AUIPC, LUI
+  case(opcode_in)
+    LOAD:     imm_mux_sel_reg = 1'b1;
+    STORE:    imm_mux_sel_reg = 1'b1;
+    OPIMM:    imm_mux_sel_reg = 1'b1;
+    JAL:      imm_mux_sel_reg = 1'b1;
+    JALR:     imm_mux_sel_reg = 1'b1;
+    AUIPC:    imm_mux_sel_reg = 1'b1;
+    LUI:      imm_mux_sel_reg = 1'b1;
+    default:  imm_mux_sel_reg = 1'b0; // E.E.
+  endcase
 end
 
 
+// ====================================
+// OUTPUT LOGIC
+// ====================================
 // Execution unit selection output
 assign exec_unit_sel_out = exec_sel_reg;
 assign exec_unit_uop_out = 4'b1010;
 
-// General purpose registers output
+// PC mux selection output
+assign pc_mux_sel_out = pc_mux_sel_reg;
+
+// Immediate value selection output
+assign imm_mux_sel_out = imm_mux_sel_reg;
+
+// ====================================
+// General purpose registers output. To be deprecated
 assign dec_gpr_src_a_out = rs1_in;
 assign dec_gpr_src_b_out = rs2_in;
 assign dec_gpr_des_out = rd_in;
+// ====================================
 
 endmodule
