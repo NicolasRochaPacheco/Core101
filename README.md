@@ -19,7 +19,7 @@ This part describes how to use Core101. We provide instructions to allow virtual
 ### Docker
 Core101 is intended to be synthetized within a Docker container, in order to keep all dependencies and prerrequisites in an isolated virtual environment. Nevertheless, if you have the requiered software installed on your machine there is no reason for Core101 coming up with errors, unless it is a matter of source code, in which case we apologize beforehand.
 
-We strongly recommend you using Docker, and the provided Docker image, to synthetize and test our code. Please check the [Core101 Docker documentation](https://github.com/NicolasRochaPacheco/Core101/blob/master/docker) if you want to use our Dockerfile. All console commands from Core101 documentation are intended to be run on a Docker container unless otherwise stated.
+We strongly recommend you using Docker, and the provided Docker image, to synthetize and test our code. Please check the [Core101 Docker documentation](https://github.com/NicolasRochaPacheco/Core101/blob/master/docker) if you want to use our Dockerfile.
 
 
 ### Synthetization
@@ -27,7 +27,7 @@ Synthetization of Core101 is done with [Verilator](https://www.veripool.org/proj
 
     $ source l0g1c2docker.bash
 
-This bash script will copy the 
+This bash script will copy this repository inside the Docker container, then it will synthetize the core, and run some tests. We are currently thinking of how to allow an user to run his/her own tests within the Docker container.
 
 ### Tests
 We will provide two synthetization tests using Verilator, these tests are intended to check that modules can be synthetized. Of course, installation of prerrequisites should not be a problem since we provide a Docker image with all dependencies and requiered files.
