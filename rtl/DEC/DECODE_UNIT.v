@@ -30,6 +30,9 @@ module DECODE_UNIT (
   // Immediate mux selection signal
   output imm_mux_sel_out,
 
+  // Exceptions signals
+  output invalid_ins_exception,
+
   // ================================================================
   // Register selection will be moved directly to GPR module
   // ================================================================
@@ -60,18 +63,18 @@ module DECODE_UNIT (
 // ====================================
 // Opcode in possible values
 parameter LOAD = 5'b00000;   // E U
-parameter OPIMM = 5'b00100;  // E
-parameter AUIPC = 5'b00101;  // E
-parameter STORE = 5'b01000;  // E
-parameter OP = 5'b01100;     // E
-parameter LUI = 5'b01101;    // E
-parameter BRANCH = 5'b11000; // E
+parameter OPIMM = 5'b00100;  // E U
+parameter AUIPC = 5'b00101;  // E U
+parameter STORE = 5'b01000;  // E U
+parameter OP = 5'b01100;     // E U
+parameter LUI = 5'b01101;    // E U
+parameter BRANCH = 5'b11000; // E U*
 parameter JALR = 5'b11001;   // E
 parameter JAL = 5'b11011;    // E
 parameter SYSTEM = 5'b11100; // E
 parameter OPV = 5'b10101;    // E
 
-// Execution unit selection values
+// Execution unit selection
 parameter INT_EXEC_SEL = 3'b001;
 parameter LSU_EXEC_SEL = 3'b010;
 parameter VEC_EXEC_SEL = 3'b100;
@@ -121,10 +124,33 @@ always@(*) begin
                               exec_uop_reg = 4'b0000; // ADD on INT_EXEC
                           else
                               exec_uop_reg = 4'b0001; // SUB on INT_EXEC
+                  3'b001: exec_uop_reg = 4'b1111;     // SLL on INT_EXEC
+                  3'b010: exec_uop_reg = 4'b1010;     // SLT on INT_EXEC
+                  3'b011: exec_uop_reg = 4'b1011;     // SLTU on INT_EXEC
                   3'b100: exec_uop_reg = 4'b0100;     // XOR on INT_EXEC
-                  default: exec_uop_reg = 4'b1010;
+                  3'b101: if (funct7_in == 7'b0000000)
+                            exec_uop_reg = 4'b1110;   // SRL on INT_EXEC
+                          else
+                            exec_uop_reg = 4'b1101;   // SRA on INT_EXEC
+                  3'b110: exec_uop_reg = 4'b0010;     // OR on INT_EXEC
+                  3'b111: exec_uop_reg = 4'b0011;     // AND on INT_EXEC
                 endcase
               end
+
+    // OP-IMM opcode
+    OPIMM:    case(funct3_in)
+                3'b000: exec_uop_reg = 4'b0000; // ADD on INT_EXEC
+                3'b001: exec_uop_reg = 4'b1111; // SLL on INT_EXEC
+                3'b010: exec_uop_reg = 4'b1010: // SLT on INT_EXEC
+                3'b011: exec_uop_reg = 4'b1011; // SLTU on INT_EXEC
+                3'b100: exec_uop_reg = 4'b0100; // XOR on INT_EXEC
+                3'b101: if (funct7 == 7'b0000000)
+                          exec_uop_reg = 4'b1110; // SRL on INT_EXEC
+                        else
+                          exec_uop_reg = 4'b1101; // SRA on INT_EXEC
+                3'b110: exec_uop_reg = 4'b0010; // OR on INT_EXEC
+                3'b111: exec_uop_reg = 4'b0011; // AND on INT_EXEC
+              endcase
 
     // LOAD opcode
     LOAD:     case(funct3_in)
@@ -136,7 +162,33 @@ always@(*) begin
                 default:  exec_uop_reg = 4'b0000; // funct3 not valid. Raises exception.
               endcase
 
-    default: exec_uop_reg = 4'b0101;
+    // STORE opcode
+    STORE:    case(funct3_in)
+                3'b000:   exec_uop_reg = 4'b1001; // SB on LSU_EXEC
+                3'b001:   exec_uop_reg = 4'b1010; // SH on LSU_EXEC
+                3'b010:   exec_uop_reg = 4'b1100; // SW on LSU_EXEC
+                default   exec_uop_reg = 4'b0000; // funct3 not valid. Raises exception.
+              endcase
+
+    // BRANCH opcode
+    BRANCH:   case(funct3_in)
+                3'b000:   exec_uop_reg = 4'b0000; // BEQ on ???
+                3'b001:   exec_uop_reg = 4'b0000; // BNE on ???
+                3'b100:   exec_uop_reg = 4'b0000; // BLT on ???
+                3'b101:   exec_uop_reg = 4'b0000; // BGE on ???
+                3'b110:   exec_uop_reg = 4'b0000; // BLTU on ???
+                3'b111:   exec_uop_reg = 4'b0000; // BGEU on ???
+                default:  exec_uop_reg = 4'b0000; // funct3 not valid. Raises exception.
+              endcase
+
+    // LUI opcode
+    LUI:      exec_uop_reg = 4'b1001; // LUI on INT_EXEC (buffer rs2)
+
+    // AUIPC opcode
+    AUIPC:    exec_uop_reg = 4'b0000; // ADD on INT_EXEC
+
+
+    default: exec_uop_reg = 4'b0000;
   endcase
 
   // Will use PC value?
@@ -146,7 +198,7 @@ always@(*) begin
     JAL:      pc_mux_sel_reg = 1'b1;
     JALR:     pc_mux_sel_reg = 1'b1;
     BRANCH:   pc_mux_sel_reg = 1'b1;
-    default:  pc_mux_sel_reg = 1'b0;
+    default:  pc_mux_sel_reg = 1'b0; // E.E.
   endcase
 
   // Will use an immediate value?
