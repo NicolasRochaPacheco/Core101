@@ -62,6 +62,12 @@ wire [4:0] gpr_a_wire;
 wire [4:0] gpr_b_wire;
 wire [4:0] gpr_rd_wire;
 
+// enable signals
+wire int_enable_wire;
+wire vec_enable_wire;
+wire lsu_enable_wire;
+
+// uop wires
 wire [3:0] int_uop_wire;
 wire [3:0] vec_uop_wire;
 wire [3:0] lsu_uop_wire;
@@ -70,7 +76,7 @@ wire [3:0] lsu_uop_wire;
 // INSTANCE DEFINITION
 //==============================
 
-// Main memory definition
+// Main memory definition. Temporal module
 MAIN_MEMORY mem0(
   .main_mem_addr_in(pc_addr_wire),
 
@@ -124,6 +130,9 @@ DECODE_UNIT decode0 (
   // Immediate value mux selection signal
   .imm_mux_sel_out(pc_mux_sel_wire),
 
+  // Exception signal
+  .invalid_ins_exception(),
+
   // General purpose registers output
   .rs1_in(ir_data_wire[19:15]),
   .rs2_in(ir_data_wire[24:20]),
@@ -139,6 +148,11 @@ ISSUE_UNIT issue0 (
   .exec_unit_sel_in(exec_unit_sel_wire),
   .exec_uop_in(exec_unit_uop_wire),
 
+  // Execution unit enable signals
+  .int_enable_out(int_enable_wire),
+  .vec_enable_out(),
+  .lsu_enable_out(),
+
   // Execution unit opcodes
   .int_exec_uop_out(int_uop_wire),
   .vec_exec_uop_out(vec_uop_wire),
@@ -146,6 +160,16 @@ ISSUE_UNIT issue0 (
 );
 
 // Execution units
+INT_EXEC int0 (
+  .a_data_in(),
+  .b_data_in(),
+
+  .enable_in(int_enable_wire),
+  .uop_in(int_uop_wire),
+
+  .res_data_out()
+
+);
 
 // General purpose registers
 
