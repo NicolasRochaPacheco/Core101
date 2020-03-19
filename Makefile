@@ -8,6 +8,7 @@ CUR_DIR = $(shell pwd)
 # Verilog source files
 VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/IFU/IFU.v \
+				$(CUR_DIR)/rtl/GPR/GPR.v \
 				$(CUR_DIR)/rtl/IFU/IFU_CONTROL.v \
 				$(CUR_DIR)/rtl/DEC/DECODE_UNIT.v \
 				$(CUR_DIR)/rtl/MEM/MAIN_MEMORY.v \
@@ -15,6 +16,7 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/EX/INT_EXEC.v \
 				$(CUR_DIR)/rtl/misc/ADDER.v \
 				$(CUR_DIR)/rtl/misc/MUX_B.v \
+				$(CUR_DIR)/rtl/misc/MUX_32.v \
 				$(CUR_DIR)/rtl/misc/REG.v \
 				$(CUR_DIR)/rtl/misc/REG_NEG.v
 
