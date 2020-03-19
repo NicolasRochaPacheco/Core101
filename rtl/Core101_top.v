@@ -45,8 +45,11 @@ module Core101_top(
 );
 
 // WIRE DEFINITION
+
+// Control signals wires
 wire pc_set_wire;
 wire ir_set_wire;
+
 
 wire [31:0] pc_addr_wire;
 wire [31:0] ir_data_wire;
@@ -131,15 +134,7 @@ DECODE_UNIT decode0 (
   .imm_mux_sel_out(pc_mux_sel_wire),
 
   // Exception signal
-  .invalid_ins_exception(),
-
-  // General purpose registers output
-  .rs1_in(ir_data_wire[19:15]),
-  .rs2_in(ir_data_wire[24:20]),
-  .rd_in(ir_data_wire[11:7]),
-  .dec_gpr_src_a_out(gpr_a_wire),
-  .dec_gpr_src_b_out(gpr_b_wire),
-  .dec_gpr_des_out(gpr_rd_wire)
+  .invalid_ins_exception()
 );
 
 // Issue unit
@@ -172,9 +167,27 @@ INT_EXEC int0 (
 );
 
 // General purpose registers
+GPR gpr0 (
 
+  // Clock in
+  .clock_in(clock_in),
+  .reset_in(reset_in),
 
-// Main control unit
+  // Addresses inputs
+  .rs1_addr_in(gpr_a_wire),
+  .rs2_addr_in(gpr_b_wire),
+  .rd_addr_in(gpr_rd_wire),
+
+  // Read data outputs
+  .rs1_data_out(),
+  .rs2_data_out(),
+
+  // Write data output
+  .rd_data_in()
+
+  );
+
+// Output assignment
 assign ins_mem_addr_out = pc_addr_wire;
 assign gpr_a_out = gpr_a_wire;
 assign gpr_b_out = gpr_b_wire;
