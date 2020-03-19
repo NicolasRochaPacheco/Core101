@@ -31,18 +31,7 @@ module DECODE_UNIT (
   output imm_mux_sel_out,
 
   // Exceptions signals
-  output invalid_ins_exception,
-
-  // ================================================================
-  // Register selection will be moved directly to GPR module
-  // ================================================================
-  input [4:0] rs1_in,
-  input [4:0] rs2_in,
-  input [4:0] rd_in,
-  output [4:0] dec_gpr_src_a_out,
-  output [4:0] dec_gpr_src_b_out,
-  output [4:0] dec_gpr_des_out
-  // ================================================================
+  output invalid_ins_exception
 );
 
 // ==========================
@@ -141,10 +130,10 @@ always@(*) begin
     OPIMM:    case(funct3_in)
                 3'b000: exec_uop_reg = 4'b0000; // ADD on INT_EXEC
                 3'b001: exec_uop_reg = 4'b1111; // SLL on INT_EXEC
-                3'b010: exec_uop_reg = 4'b1010: // SLT on INT_EXEC
+                3'b010: exec_uop_reg = 4'b1010; // SLT on INT_EXEC
                 3'b011: exec_uop_reg = 4'b1011; // SLTU on INT_EXEC
                 3'b100: exec_uop_reg = 4'b0100; // XOR on INT_EXEC
-                3'b101: if (funct7 == 7'b0000000)
+                3'b101: if (funct7_in == 7'b0000000)
                           exec_uop_reg = 4'b1110; // SRL on INT_EXEC
                         else
                           exec_uop_reg = 4'b1101; // SRA on INT_EXEC
@@ -228,12 +217,5 @@ assign pc_mux_sel_out = pc_mux_sel_reg;
 
 // Immediate value selection output
 assign imm_mux_sel_out = imm_mux_sel_reg;
-
-// ====================================
-// General purpose registers output. To be deprecated
-assign dec_gpr_src_a_out = rs1_in;
-assign dec_gpr_src_b_out = rs2_in;
-assign dec_gpr_des_out = rd_in;
-// ====================================
 
 endmodule
