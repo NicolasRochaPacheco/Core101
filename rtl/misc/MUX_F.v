@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-module MUX_32 (
+module MUX_F (
 
   input [4:0] mux_sel_in,
 
