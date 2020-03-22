@@ -49,28 +49,30 @@ module Core101_top(
 // Control signals wires
 wire pc_set_wire;
 wire ir_set_wire;
-
-
 wire [31:0] pc_addr_wire;
 wire [31:0] ir_data_wire;
 wire [31:0] ins_mem_data_wire;
-
 wire [2:0] exec_unit_sel_wire;
 wire [3:0] exec_unit_uop_wire;
-
 wire pc_mux_sel_wire;
 wire imm_mux_sel_wire;
 
+// GPR registers addresses wires
 wire [4:0] gpr_a_wire;
 wire [4:0] gpr_b_wire;
 wire [4:0] gpr_rd_wire;
 
-// enable signals
+// GPR data wires
+wire [31:0] rs1_data_wire;
+wire [31:0] rs2_data_wire;
+wire [31:0] rd_data_wire;
+
+// Execution unit enable wires
 wire int_enable_wire;
 wire vec_enable_wire;
 wire lsu_enable_wire;
 
-// uop wires
+// uOP data wires
 wire [3:0] int_uop_wire;
 wire [3:0] vec_uop_wire;
 wire [3:0] lsu_uop_wire;
@@ -78,13 +80,13 @@ wire [3:0] lsu_uop_wire;
 //==============================
 // INSTANCE DEFINITION
 //==============================
-
-// Main memory definition. Temporal module
+// Main memory definition. Temporal module. Acts as the main memory
 MAIN_MEMORY mem0(
   .main_mem_addr_in(pc_addr_wire),
 
   .main_mem_data_out(ins_mem_data_wire)
 );
+
 
 // Instruction fetch unit module
 IFU ifu0(
@@ -103,6 +105,7 @@ IFU ifu0(
  .ir_set_in(1'b1)
 );
 
+
 // The IFU control unit. A state machine for enabling or halting the IFU
 IFU_CONTROL ifu_ctrl0 (
   // Clock and reset signals
@@ -117,25 +120,28 @@ IFU_CONTROL ifu_ctrl0 (
   .ifu_ctrl_ir_set_out(ir_set_wire)
 );
 
+
 // Main decode unit
 DECODE_UNIT decode0 (
+  // Opcodes inputs
   .opcode_in(ir_data_wire[6:2]),
   .funct3_in(ir_data_wire[14:12]),
   .funct7_in(ir_data_wire[31:25]),
 
-  // Execution unit selection
+  // Execution unit selection outputs
   .exec_unit_sel_out(exec_unit_sel_wire),
   .exec_unit_uop_out(exec_unit_uop_wire),
 
-  // PC mux selection signal
+  // PC mux selection signal outputs
   .pc_mux_sel_out(pc_mux_sel_wire),
 
-  // Immediate value mux selection signal
+  // Immediate value mux selection signal outputs
   .imm_mux_sel_out(pc_mux_sel_wire),
 
-  // Exception signal
+  // Invalid isntruction exception signal output
   .invalid_ins_exception()
 );
+
 
 // Issue unit
 ISSUE_UNIT issue0 (
@@ -154,44 +160,45 @@ ISSUE_UNIT issue0 (
   .lsu_exec_uop_out(lsu_uop_wire)
 );
 
+
 // Execution units
 INT_EXEC int0 (
-  .a_data_in(),
-  .b_data_in(),
+  .a_data_in(rs1_data_wire),
+  .b_data_in(rs1_data_wire),
 
   .enable_in(int_enable_wire),
   .uop_in(int_uop_wire),
 
   .res_data_out()
-
 );
+
 
 // General purpose registers
 GPR gpr0 (
 
-  // Clock in
+  // Clock and reset inputs
   .clock_in(clock_in),
   .reset_in(reset_in),
 
-  // Addresses inputs
-  .rs1_addr_in(gpr_a_wire),
-  .rs2_addr_in(gpr_b_wire),
-  .rd_addr_in(gpr_rd_wire),
+  // Registers addresses input signals
+  .rs1_addr_in(ir_data_wire[19:15]),
+  .rs2_addr_in(ir_data_wire[24:20]),
+  .rd_addr_in(ir_data_wire[11:7]), // Directly from IR, must be pipelined
 
   // Read data outputs
-  .rs1_data_out(),
-  .rs2_data_out(),
+  .rs1_data_out(rs1_data_wire),
+  .rs2_data_out(rs2_data_wire),
 
   // Write data output
-  .rd_data_in()
+  .rd_data_in(rd_data_wire)
 
-  );
+);
 
 // Output assignment
 assign ins_mem_addr_out = pc_addr_wire;
-assign gpr_a_out = gpr_a_wire;
-assign gpr_b_out = gpr_b_wire;
-assign gpr_rd_out = gpr_rd_wire;
+assign gpr_a_out = ir_data_wire[19:15];
+assign gpr_b_out = ir_data_wire[24:20];
+assign gpr_rd_out = ir_data_wire[11:7];
 assign ins_data_out = ir_data_wire;
 assign exec_unit_sel_out = exec_unit_sel_wire;
 
