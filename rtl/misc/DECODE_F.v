@@ -1,3 +1,18 @@
+// Core101 32-output decode module definition
+// Copyright (C) 2019 Nicolas Rocha Pacheco
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 module DECODE_F (
@@ -37,6 +52,7 @@ module DECODE_F (
   output sel_x31_out
 );
 
+// Wire definiton
 wire sel_x00_wire;
 wire sel_x01_wire;
 wire sel_x02_wire;
@@ -145,5 +161,39 @@ always @ (*) begin
     5'b11111: sel_x31_wire = 1'b1;
   endcase
 end
+
+// Assigns the output of sel wires
+assign sel_x00_out = sel_x00_wire;
+assign sel_x01_out = sel_x01_wire;
+assign sel_x02_out = sel_x02_wire;
+assign sel_x03_out = sel_x03_wire;
+assign sel_x04_out = sel_x04_wire;
+assign sel_x05_out = sel_x05_wire;
+assign sel_x06_out = sel_x06_wire;
+assign sel_x07_out = sel_x07_wire;
+assign sel_x08_out = sel_x08_wire;
+assign sel_x09_out = sel_x09_wire;
+assign sel_x10_out = sel_x10_wire;
+assign sel_x11_out = sel_x11_wire;
+assign sel_x12_out = sel_x12_wire;
+assign sel_x13_out = sel_x13_wire;
+assign sel_x14_out = sel_x14_wire;
+assign sel_x15_out = sel_x15_wire;
+assign sel_x16_out = sel_x16_wire;
+assign sel_x17_out = sel_x17_wire;
+assign sel_x18_out = sel_x18_wire;
+assign sel_x19_out = sel_x19_wire;
+assign sel_x20_out = sel_x20_wire;
+assign sel_x21_out = sel_x21_wire;
+assign sel_x22_out = sel_x22_wire;
+assign sel_x23_out = sel_x23_wire;
+assign sel_x24_out = sel_x24_wire;
+assign sel_x25_out = sel_x25_wire;
+assign sel_x26_out = sel_x26_wire;
+assign sel_x27_out = sel_x27_wire;
+assign sel_x28_out = sel_x28_wire;
+assign sel_x29_out = sel_x29_wire;
+assign sel_x30_out = sel_x30_wire;
+assign sel_x31_out = sel_x31_wire;
 
 endmodule
