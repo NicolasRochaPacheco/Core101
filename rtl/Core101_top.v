@@ -47,20 +47,15 @@ module Core101_top(
 // WIRE DEFINITION
 
 // Control signals wires
-wire pc_set_wire;
-wire ir_set_wire;
-wire [31:0] pc_addr_wire;
-wire [31:0] ir_data_wire;
-wire [31:0] ins_mem_data_wire;
+wire pc_set_wire;  // PC set signal
+wire ir_set_wire;  // IR set signal
+wire [31:0] pc_addr_wire;  // PC new addr bus
+wire [31:0] ir_data_wire;  // IR-driven data bus
+wire [31:0] ins_mem_data_wire;  // $I driven data bus
 wire [2:0] exec_unit_sel_wire;
 wire [3:0] exec_unit_uop_wire;
 wire pc_mux_sel_wire;
 wire imm_mux_sel_wire;
-
-// GPR registers addresses wires
-wire [4:0] gpr_a_wire;
-wire [4:0] gpr_b_wire;
-wire [4:0] gpr_rd_wire;
 
 // GPR data wires
 wire [31:0] rs1_data_wire;
@@ -120,7 +115,6 @@ IFU_CONTROL ifu_ctrl0 (
   .ifu_ctrl_ir_set_out(ir_set_wire)
 );
 
-
 // Main decode unit
 DECODE_UNIT decode0 (
   // Opcodes inputs
@@ -136,12 +130,23 @@ DECODE_UNIT decode0 (
   .pc_mux_sel_out(pc_mux_sel_wire),
 
   // Immediate value mux selection signal outputs
-  .imm_mux_sel_out(pc_mux_sel_wire),
+  .imm_mux_sel_out(imm_mux_sel_wire),
 
   // Invalid isntruction exception signal output
   .invalid_ins_exception()
 );
 
+// Immediate value generator unit
+IMM_GEN imm_gen0 (
+  // OP to select the appropiate format
+  .opcode_in(),
+
+  // Instruction source values
+  .instruction_in(),
+
+  // Immediate value output
+  .immediate_out()
+);
 
 // Issue unit
 ISSUE_UNIT issue0 (
@@ -149,10 +154,15 @@ ISSUE_UNIT issue0 (
   .exec_unit_sel_in(exec_unit_sel_wire),
   .exec_uop_in(exec_unit_uop_wire),
 
+  // Current uOP requiered registers data
+  //.rsa_data_in(),
+  //.rsb_data_in(),
+  //.rd_addr_in(),
+
   // Execution unit enable signals
   .int_enable_out(int_enable_wire),
-  .vec_enable_out(),
-  .lsu_enable_out(),
+  .vec_enable_out(vec_enable_wire),
+  .lsu_enable_out(lsu_enable_wire),
 
   // Execution unit opcodes
   .int_exec_uop_out(int_uop_wire),
@@ -169,7 +179,7 @@ INT_EXEC int0 (
   .enable_in(int_enable_wire),
   .uop_in(int_uop_wire),
 
-  .res_data_out()
+  .res_data_out(rd_data_wire) // Must go to a output MUX
 );
 
 
@@ -183,7 +193,7 @@ GPR gpr0 (
   // Registers addresses input signals
   .rs1_addr_in(ir_data_wire[19:15]),
   .rs2_addr_in(ir_data_wire[24:20]),
-  .rd_addr_in(ir_data_wire[11:7]), // Directly from IR, must be pipelined
+  .rd_addr_in(ir_data_wire[11:7]), // Directly from IR! Must be pipelined
 
   // Read data outputs
   .rs1_data_out(rs1_data_wire),
@@ -193,6 +203,7 @@ GPR gpr0 (
   .rd_data_in(rd_data_wire)
 
 );
+
 
 // Output assignment
 assign ins_mem_addr_out = pc_addr_wire;
