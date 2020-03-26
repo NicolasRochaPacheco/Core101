@@ -31,6 +31,7 @@ module Core101_top(
   output [3:0] int_uop_out,
   output [3:0] vec_uop_out,
   output [3:0] lsu_uop_out,
+  output [31:0] imm_value_out,
   // ================================================================
 
   // Ins. mem. interface
@@ -61,6 +62,7 @@ wire imm_mux_sel_wire;
 wire [31:0] rs1_data_wire;
 wire [31:0] rs2_data_wire;
 wire [31:0] rd_data_wire;
+wire [31:0] imm_value_wire;
 
 // Execution unit enable wires
 wire int_enable_wire;
@@ -139,14 +141,19 @@ DECODE_UNIT decode0 (
 // Immediate value generator unit
 IMM_GEN imm_gen0 (
   // OP to select the appropiate format
-  .opcode_in(),
+  .opcode_in(ir_data_wire[6:2]),
 
   // Instruction source values
-  .instruction_in(),
+  .instruction_in(ir_data_wire[31:7]),
 
   // Immediate value output
-  .immediate_out()
+  .immediate_out(imm_value_wire)
 );
+
+// IMM VALUE MUX should be here
+
+
+// PC MUX should be here
 
 // Issue unit
 ISSUE_UNIT issue0 (
@@ -212,6 +219,7 @@ assign gpr_b_out = ir_data_wire[24:20];
 assign gpr_rd_out = ir_data_wire[11:7];
 assign ins_data_out = ir_data_wire;
 assign exec_unit_sel_out = exec_unit_sel_wire;
+assign imm_value_out = imm_value_wire;
 
 // uOp codes output
 assign int_uop_out = int_uop_wire;
