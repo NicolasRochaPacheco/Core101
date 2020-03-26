@@ -20,14 +20,14 @@ module REG #(parameter DATA_WIDTH=32)(
     input clock_in,
     input reset_in,
 
+    // Control signals
+    input set_in,
+
     // Data input
     input [DATA_WIDTH-1:0] data_in,
 
     // Data output
-    output [DATA_WIDTH-1:0] data_out,
-
-    // Control signals
-    input set_in
+    output [DATA_WIDTH-1:0] data_out
   );
 
   // REGISTER DEFINITION
