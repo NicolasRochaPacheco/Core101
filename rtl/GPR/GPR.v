@@ -284,6 +284,8 @@ REG x07 (
   .data_out(int_reg_x07_data_wire)
 );
 
+
+
 // OUTPUT MUX RS1
 MUX_F rs1_output_mux (
   // RS1 selectionn input
@@ -374,7 +376,5 @@ MUX_F rs2_output_mux (
 // Assigns output for RS1 and RS2
 assign rs1_data_out = rs1_data_wire;
 assign rs2_data_out = rs2_data_wire;
-
-
 
 endmodule
