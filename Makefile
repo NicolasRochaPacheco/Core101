@@ -15,7 +15,9 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/MEM/MAIN_MEMORY.v \
 				$(CUR_DIR)/rtl/ISSUE/ISSUE_UNIT.v \
 				$(CUR_DIR)/rtl/EX/INT_EXEC.v \
+				$(CUR_DIR)/rtl/EX/ALU.v \
 				$(CUR_DIR)/rtl/misc/ADDER.v \
+				$(CUR_DIR)/rtl/misc/MUX_A.v \
 				$(CUR_DIR)/rtl/misc/MUX_B.v \
 				$(CUR_DIR)/rtl/misc/MUX_F.v \
 				$(CUR_DIR)/rtl/misc/DECODE_F.v \
