@@ -32,6 +32,7 @@ module Core101_top(
   output [3:0] vec_uop_out,
   output [3:0] lsu_uop_out,
   output [31:0] imm_value_out,
+  output [63:0] if_id_reg_data_out,
   // ================================================================
 
   // Ins. mem. interface
@@ -55,6 +56,7 @@ wire [31:0] ir_data_wire;  // IR-driven data bus
 wire [31:0] ins_mem_data_wire;  // $I driven data bus
 wire [2:0] exec_unit_sel_wire;
 wire [3:0] exec_unit_uop_wire;
+wire rd_mux_sel_wire;
 wire pc_mux_sel_wire;
 wire imm_mux_sel_wire;
 
@@ -63,6 +65,10 @@ wire [31:0] rs1_data_wire;
 wire [31:0] rs2_data_wire;
 wire [31:0] rd_data_wire;
 wire [31:0] imm_value_wire;
+
+// Issue wires
+wire [31:0] a_data_wire; // Either R[rs1] or pc value
+wire [31:0] b_data_wire; // Either R[rs2] or imm value
 
 // Execution unit enable wires
 wire int_enable_wire;
@@ -74,16 +80,23 @@ wire [3:0] int_uop_wire;
 wire [3:0] vec_uop_wire;
 wire [3:0] lsu_uop_wire;
 
-//==============================
-// INSTANCE DEFINITION
-//==============================
+// Pipeline registers wires
+wire [63:0] if_id_reg_data_wire;
+wire [142:0] id_is_reg_data_wire;
+
+
+// ========================================================
+//                      INSTANCE DEFINITION
+// ========================================================
+// INSTRUCTON FETCH
+// ========================================================
+
 // Main memory definition. Temporal module. Acts as the main memory
 MAIN_MEMORY mem0(
   .main_mem_addr_in(pc_addr_wire),
 
   .main_mem_data_out(ins_mem_data_wire)
 );
-
 
 // Instruction fetch unit module
 IFU ifu0(
@@ -102,7 +115,6 @@ IFU ifu0(
  .ir_set_in(1'b1)
 );
 
-
 // The IFU control unit. A state machine for enabling or halting the IFU
 IFU_CONTROL ifu_ctrl0 (
   // Clock and reset signals
@@ -117,12 +129,52 @@ IFU_CONTROL ifu_ctrl0 (
   .ifu_ctrl_ir_set_out(ir_set_wire)
 );
 
+// Instruction fetch/instruction decode (IF/ID) pipeline register
+// IR (32b); PC (32b); TOTAL 64b;
+REG #(.DATA_WIDTH(64)) if_id_reg (
+  .clock_in(clock_in),
+  .reset_in(reset_in),
+
+  // Control signals
+  .set_in(1'b1),
+
+  // Data input
+  .data_in({ir_data_wire, pc_addr_wire}),
+
+  // Data output
+  .data_out(if_id_reg_data_wire)
+);
+
+
+// ========================================================
+// INSTRUCTION DECODE
+// ========================================================
+
+// General purpose registers
+GPR gpr0 (
+  // Clock and reset inputs
+  .clock_in(clock_in),
+  .reset_in(reset_in),
+
+  // Registers addresses input signals
+  .rs1_addr_in(ir_data_wire[19:15]),
+  .rs2_addr_in(ir_data_wire[24:20]),
+  .rd_addr_in(if_id_reg_data_wire[43:39]), // Directly from IR! Must be pipelined
+
+  // Read data outputs
+  .rs1_data_out(rs1_data_wire),
+  .rs2_data_out(rs2_data_wire),
+
+  // Write data output
+  .rd_data_in(rd_data_wire)
+);
+
 // Main decode unit
 DECODE_UNIT decode0 (
   // Opcodes inputs
-  .opcode_in(ir_data_wire[6:2]),
-  .funct3_in(ir_data_wire[14:12]),
-  .funct7_in(ir_data_wire[31:25]),
+  .opcode_in(if_id_reg_data_wire[38:34]),
+  .funct3_in(if_id_reg_data_wire[46:44]),
+  .funct7_in(if_id_reg_data_wire[63:57]),
 
   // Execution unit selection outputs
   .exec_unit_sel_out(exec_unit_sel_wire),
@@ -141,30 +193,79 @@ DECODE_UNIT decode0 (
 // Immediate value generator unit
 IMM_GEN imm_gen0 (
   // OP to select the appropiate format
-  .opcode_in(ir_data_wire[6:2]),
+  .opcode_in(if_id_reg_data_wire[38:34]),
 
   // Instruction source values
-  .instruction_in(ir_data_wire[31:7]),
+  .instruction_in(if_id_reg_data_wire[63:39]),
 
   // Immediate value output
   .immediate_out(imm_value_wire)
 );
 
-// IMM VALUE MUX should be here
+
+// Instruction decode/instruction issue (ID/IS) pipeline register
+// rs1_data(32b); rs2_data(32b); rd_addr(5b); imm(32b);
+REG #(.DATA_WIDTH(143)) id_is_reg (
+  // Clock and reset inputs
+  .clock_in(clock_in),
+  .reset_in(reset_in),
+
+  // Set signal input
+  .set_in(1'b1),
+
+  // Data input
+  .data_in({rs1_data_wire,
+            rs2_data_wire,
+            if_id_reg_data_wire[43:39],
+            imm_value_wire,
+            rd_mux_sel_wire,
+            imm_mux_sel_wire,
+            pc_mux_sel_wire,
+            exec_unit_uop_wire,
+            exec_unit_sel_wire,
+            if_id_reg_data_wire[31:0]}),
+
+  // Data output
+  .data_out(id_is_reg_data_wire)
+);
+
+// ========================================================
+// INSTRUCTION ISSUE
+// ========================================================
+
+// Immediate value multiplexer
+MUX_A imm_mux (
+  // Multiplexer source select signal
+  .data_sel_in(imm_mux_sel_wire),
+
+  // Multiplexer inputs
+  .a_data_src_in(id_is_reg_data_wire[68:37]), // R[rs2]
+  .b_data_src_in(id_is_reg_data_wire[73:42]), // IMM
+
+  // Multiplexer output
+  .data_out(b_data_wire)
+);
 
 
-// PC MUX should be here
+// Program counter value multiplexer
+MUX_A pc_mux (
+  // Multiplexer source select signal
+  .data_sel_in(pc_mux_sel_wire),
+
+  // Multiplexer inputs
+  .a_data_src_in(id_is_reg_data_wire[100:69]),  // R[rs1]
+  .b_data_src_in(id_is_reg_data_wire[31:0]),    // PC
+
+  // Multiplexer output
+  .data_out(a_data_wire)
+);
+
 
 // Issue unit
 ISSUE_UNIT issue0 (
   // Execution unit selection bus
   .exec_unit_sel_in(exec_unit_sel_wire),
   .exec_uop_in(exec_unit_uop_wire),
-
-  // Current uOP requiered registers data
-  //.rsa_data_in(),
-  //.rsb_data_in(),
-  //.rd_addr_in(),
 
   // Execution unit enable signals
   .int_enable_out(int_enable_wire),
@@ -177,49 +278,67 @@ ISSUE_UNIT issue0 (
   .lsu_exec_uop_out(lsu_uop_wire)
 );
 
+// Instruction issue/execution pipeline register
+//
+REG #(.DATA_WIDTH(32)) is_ex_reg (
+  .clock_in(),  // Clock input
+  .reset_in(),  // Reset input
+  .set_in(),    // Set signal input
+  .data_in(),
+  .data_out()
+);
+
+// ========================================================
+// EXECUTION
+// ========================================================
 
 // Execution units
 INT_EXEC int0 (
-  .a_data_in(rs1_data_wire),
-  .b_data_in(rs1_data_wire),
+  .a_data_in(),
+  .b_data_in(),
 
-  .enable_in(int_enable_wire),
-  .uop_in(int_uop_wire),
+  .enable_in(),
+  .uop_in(),
 
-  .res_data_out(rd_data_wire) // Must go to a output MUX
+  .res_data_out() // Must go to an output MUX
+);
+
+//LSU_EXEC lsu0 (
+
+
+//);
+
+
+//VEC_EXEC vec0
+
+// Execution/writeback pipeline register
+REG #(.DATA_WIDTH(64)) ex_wb_reg (
+  .clock_in(),  // Clock input
+  .reset_in(),  // Reset input
+  .set_in(),    // Set signal input
+  .data_in(),
+  .data_out()
 );
 
 
-// General purpose registers
-GPR gpr0 (
+// ========================================================
+// REGISTER WRITEBACK
+// ========================================================
 
-  // Clock and reset inputs
-  .clock_in(clock_in),
-  .reset_in(reset_in),
 
-  // Registers addresses input signals
-  .rs1_addr_in(ir_data_wire[19:15]),
-  .rs2_addr_in(ir_data_wire[24:20]),
-  .rd_addr_in(ir_data_wire[11:7]), // Directly from IR! Must be pipelined
 
-  // Read data outputs
-  .rs1_data_out(rs1_data_wire),
-  .rs2_data_out(rs2_data_wire),
-
-  // Write data output
-  .rd_data_in(rd_data_wire)
-
-);
 
 
 // Output assignment
-assign ins_mem_addr_out = pc_addr_wire;
+assign ins_mem_addr_out = if_id_reg_data_wire[31:0];  // Working properly
+assign ins_data_out = if_id_reg_data_wire[63:32];     // Working properly
+
 assign gpr_a_out = ir_data_wire[19:15];
-assign gpr_b_out = ir_data_wire[24:20];
-assign gpr_rd_out = ir_data_wire[11:7];
-assign ins_data_out = ir_data_wire;
+assign gpr_b_out = if_id_reg_data_wire[56:52];
+assign gpr_rd_out = if_id_reg_data_wire[43:39];
 assign exec_unit_sel_out = exec_unit_sel_wire;
-assign imm_value_out = imm_value_wire;
+assign imm_value_out = id_is_reg_data_wire[31:0];
+assign if_id_reg_data_out = if_id_reg_data_wire;
 
 // uOp codes output
 assign int_uop_out = int_uop_wire;
