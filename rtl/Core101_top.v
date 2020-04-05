@@ -32,7 +32,11 @@ module Core101_top(
   output [3:0] vec_uop_out,
   output [3:0] lsu_uop_out,
   output [31:0] imm_value_out,
+  // ================================================================
+  // Phase two debugging. Only pipeline registers.
+  // ================================================================
   output [63:0] if_id_reg_data_out,
+  output [142:0] id_is_reg_data_out,
   // ================================================================
 
   // Ins. mem. interface
@@ -234,7 +238,7 @@ REG #(.DATA_WIDTH(143)) id_is_reg (
 // ========================================================
 
 // Immediate value multiplexer
-MUX_A imm_mux (
+MUX_A #(.DATA_WIDTH(32)) imm_mux (
   // Multiplexer source select signal
   .data_sel_in(imm_mux_sel_wire),
 
@@ -248,7 +252,7 @@ MUX_A imm_mux (
 
 
 // Program counter value multiplexer
-MUX_A pc_mux (
+MUX_A #(.DATA_WIDTH(32)) pc_mux (
   // Multiplexer source select signal
   .data_sel_in(pc_mux_sel_wire),
 
@@ -292,6 +296,33 @@ REG #(.DATA_WIDTH(32)) is_ex_reg (
 // EXECUTION
 // ========================================================
 
+// Forward value multiplexer for data source A on INT execution unit.
+MUX_A #(.DATA_WIDTH(32)) int_a_src_mux (
+  // Multiplexer source select signal
+  .data_sel_in(<from_pipeline_register>),
+
+  // Multiplexer inputs
+  .a_data_src_in(),
+  .b_data_src_in(<from_forward_bus>),
+
+  // Multiplexer output
+  .data_out(<to_ieu_data_src_a>)
+);
+
+// Forward value multiplexer for data source A on INT execution unit.
+MUX_A #(.DATA_WIDTH(32)) int_b_src_mux (
+  // Multiplexer source select signal
+  .data_sel_in(),
+
+  // Multiplexer inputs
+  .a_data_src_in(),
+  .b_data_src_in(),
+
+  // Multiplexer output
+  .data_out()
+);
+
+
 // Execution units
 INT_EXEC int0 (
   .a_data_in(),
@@ -325,7 +356,7 @@ REG #(.DATA_WIDTH(64)) ex_wb_reg (
 // REGISTER WRITEBACK
 // ========================================================
 
-
+// Some Muxes
 
 
 
