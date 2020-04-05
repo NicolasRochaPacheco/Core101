@@ -4,10 +4,10 @@
 #include "verilated.h"
 #include "VCore101_top.h"
 
-void print_sim_status(int data[11]){
+void print_sim_status(int data[12]){
   std::printf("%03i ", data[0]);  // Clack cycle value
   std::printf("%i ",   data[1]);  // Clock signal value
-  std::printf("%08X ", data[2]);
+  std::printf("%08X ", data[2]);  //
   std::printf("%08X ", data[3]);
   std::printf("%02i ", data[4]);
   std::printf("%02i ", data[5]);
@@ -15,7 +15,8 @@ void print_sim_status(int data[11]){
   std::printf("%01i ", data[7]);
   std::printf("%01X ", data[8]);
   std::printf("%01X ", data[9]);
-  std::printf("%01X \n", data[10]);
+  std::printf("%01X ", data[10]);
+  std::printf("%i \n", data[11]);
 }
 
 
@@ -46,7 +47,7 @@ int main(int argc, char **argv){
   }
 
   // Prints some info
-  std::cout << "CC_VAL; CC; INS_ADDR; INS_DATA; GPRA; GPRB; GPRD; EXEC_SEL; INT_UOP; VEC_UOP; LSU_UOP;" << std::endl;
+  std::cout << "CC_VAL; CC; INS_ADDR; INS_DATA; GPRA; GPRB; GPRD; EXEC_SEL; INT_UOP; VEC_UOP; LSU_UOP; IMM_VAL;" << std::endl;
 
   // Main simulation cicle
   for (int k=0; k < N_CLOCKS*RESOLUTION; ++k){
@@ -73,7 +74,7 @@ int main(int argc, char **argv){
 
     core->halt_in = halt;
 
-    int data[11];
+    int data[12];
 
     data[0] = cc_val;
     data[1] = clock_arr[k];
@@ -86,6 +87,7 @@ int main(int argc, char **argv){
     data[8] = (int) core->int_uop_out;
     data[9] = (int) core->vec_uop_out;
     data[10] = (int) core->lsu_uop_out;
+    data[11] = (int) core->imm_value_out;
 
     // Prints simulation status
     print_sim_status(data);
