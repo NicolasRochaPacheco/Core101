@@ -78,7 +78,6 @@ wire [31:0] imm_value_wire;
 wire [31:0] a_data_wire; // Either R[rs1] or pc value
 wire [31:0] b_data_wire; // Either R[rs2] or imm value
 
-
 // --------------------------
 // Execution wires
 // --------------------------
@@ -319,30 +318,51 @@ REG #(.DATA_WIDTH(32)) is_ex_reg (
 
 // Forward value multiplexer for data source A on INT execution unit.
 MUX_A #(.DATA_WIDTH(32)) int_a_src_mux (
-  // Multiplexer source select signal
   .data_sel_in(<from_pipeline_register>),
-
-  // Multiplexer inputs
   .a_data_src_in(<from_pipeline_register>),
   .b_data_src_in(<from_forward_bus>),
-
-  // Multiplexer output
   .data_out(int_a_src_data_wire)
 );
 
-// Forward value multiplexer for data source A on INT execution unit.
+// Forward value multiplexer for data source B on INT execution unit.
 MUX_A #(.DATA_WIDTH(32)) int_b_src_mux (
-  // Multiplexer source select signal
   .data_sel_in(<from_pipeline_register>),
-
-  // Multiplexer inputs
   .a_data_src_in(<from_pipeline_register>),
   .b_data_src_in(<from_forward_bus>),
-
-  // Multiplexer output
   .data_out(int_b_src_data_wire)
 );
 
+// Forward value multiplexer for data source A on LSU execution unit.
+MUX_A #(.DATA_WIDTH(32)) lsu_a_src_mux (
+  .data_sel_in(<from_pipeline_register>),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(<from_forward_bus>),
+  .data_out(lsu_a_src_data_wire)
+);
+
+// Forward value multiplexer for data source B on LSU execution unit.
+MUX_A #(.DATA_WIDTH(32)) lsu_b_src_mux (
+  .data_sel_in(<from_pipeline_register>),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(<from_forward_bus>),
+  .data_out(lsu_b_src_data_wire)
+);
+
+// Forward value multiplexer for data source A on VEC execution unit.
+MUX_A #(.DATA_WIDTH(32)) vec_a_src_mux (
+  .data_sel_in(<from_pipeline_register>),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(<from_forward_bus>),
+  .data_out(vec_a_src_data_wire)
+);
+
+// Forward value multiplexer for data source B on VEC execution unit.
+MUX_A #(.DATA_WIDTH(32)) vec_b_src_mux (
+  .data_sel_in(<from_pipeline_register>),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(<from_forward_bus>),
+  .data_out(vec_b_src_data_wire)
+);
 
 // Execution units
 INT_EXEC int0 (
@@ -352,7 +372,7 @@ INT_EXEC int0 (
   .enable_in(<from_pipeline_register>),
   .uop_in(<from_pipeline_register>),
 
-  .res_data_out(<to_pipeline_register>) // Must go to an output MUX
+  .res_data_out(int_result_wire) // Must go to an output MUX
 );
 
 // LSU_EXEC lsu0 (
@@ -376,39 +396,47 @@ MUX_B #(.DATA_WIDTH(32)) ex_out_mux (
   .data_out(<to_pipeline_register>)
 );
 
-// Execution/writeback pipeline register
 REG #(.DATA_WIDTH(64)) ex_wb_reg (
-  .clock_in(clock_in),  // Clock input
-  .reset_in(reset_in),  // Reset input
-  .set_in(<from_pipeline_register>),    // Set signal input
+  .clock_in(clock_in),                  // Clock input
+  .reset_in(reset_in),                  // Reset input
+  .set_in(<from_main_control_unit>),    // Set signal input
   .data_in(<from_ex>),
-  .data_out(<to_wb>)
+  .data_out(ex_wb_reg_wire)
+);
+
+// --------------------------
+// Register writeback
+// --------------------------
+
+ADDER #(.DATA_WIDTH(32)) wb_pc_inc (
+  .a_operand_in(),              // From EX/WB register
+  .b_operand_in(32'h00000004),  // Fixed on 4
+  .add_result_out(inc_pc_wire)  // To WB mux
+);
+
+MUX_A #(.DATA_WIDTH(32)) wb_rd_mux (
+  .data_sel_in(),                 // From EX/WB register
+  .a_data_src_in(),               // From EX/WB register
+  .b_data_src_in(inc_pc_wire),    // From PC INC adder
+  .data_out(writeback_data_wire)  // To GPR data in
 );
 
 
 // ========================================================
-// REGISTER WRITEBACK
+//                      OUTPUT ASSIGNMENT
 // ========================================================
-
-
-
-
-
-// Output assignment
-assign ins_mem_addr_out = if_id_reg_data_wire[31:0];  // Working properly
-assign ins_data_out = if_id_reg_data_wire[63:32];     // Working properly
-
-assign gpr_a_out = ir_data_wire[19:15];
-assign gpr_b_out = if_id_reg_data_wire[56:52];
-assign gpr_rd_out = if_id_reg_data_wire[43:39];
-assign exec_unit_sel_out = exec_unit_sel_wire;
-assign imm_value_out = id_is_reg_data_wire[31:0];
-assign if_id_reg_data_out = if_id_reg_data_wire;
-
+assign ins_mem_addr_out = if_id_reg_data_wire[31:0];  // Deprecation warning
+assign ins_data_out = if_id_reg_data_wire[63:32];     // Deprecation warning
+assign gpr_a_out = ir_data_wire[19:15];               // Deprecation warning
+assign gpr_b_out = if_id_reg_data_wire[56:52];        // Deprecation warning
+assign gpr_rd_out = if_id_reg_data_wire[43:39];       // Deprecation warning
+assign exec_unit_sel_out = exec_unit_sel_wire;        // Deprecation warning
+assign imm_value_out = id_is_reg_data_wire[31:0];     // Deprecation warning
 // uOp codes output
-assign int_uop_out = int_uop_wire;
+assign int_uop_out = int_uop_wire;                    // Deprecation warning
 assign vec_uop_out = vec_uop_wire;
 assign lsu_uop_out = lsu_uop_wire;
-
+// Pipeline registers outputs
+assign if_id_reg_data_out = if_id_reg_data_wire;
 
 endmodule
