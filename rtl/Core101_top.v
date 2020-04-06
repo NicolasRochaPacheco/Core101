@@ -110,7 +110,7 @@ wire [31:0] inc_pc_wire;
 wire [63:0] if_id_reg_data_wire;    // IF/ID register
 wire [142:0] id_is_reg_data_wire;   // ID/IS register
 wire [122:0] is_ex_reg_data_wire;   // IS/EX register
-wire [69:0] ex_wb_reg_wire;         // EX/WB register
+wire [69:0] ex_wb_reg_data_wire;    // EX/WB register
 
 
 // ========================================================
@@ -424,7 +424,7 @@ REG #(.DATA_WIDTH(69)) ex_wb_reg (
               is_ex_reg_data_wire[100:96],
               ex_result_wire,
               is_ex_reg_data_wire[31:0]}),
-  .data_out(ex_wb_reg_wire)             // Data output for pipeline REG
+  .data_out(ex_wb_reg_data_wire)             // Data output for pipeline REG
 );
 
 // --------------------------
@@ -433,15 +433,15 @@ REG #(.DATA_WIDTH(69)) ex_wb_reg (
 
 // Adder to do a PC increment
 ADDER #(.DATA_WIDTH(32)) wb_pc_inc (
-  .a_operand_in(ex_wb_reg_wire[31:0]),  // From EX/WB register
+  .a_operand_in(ex_wb_reg_data_wire[31:0]),  // From EX/WB register
   .b_operand_in(32'h00000004),          // Fixed on 4
   .add_result_out(inc_pc_wire)          // To WB mux
 );
 
 // MUX to select the value that will be stored on RD
 MUX_A #(.DATA_WIDTH(32)) wb_rd_mux (
-  .data_sel_in(ex_wb_reg_wire[69]),       // From EX/WB register
-  .a_data_src_in(ex_wb_reg_wire[63:32]),  // From EX/WB register
+  .data_sel_in(ex_wb_reg_data_wire[69]),       // From EX/WB register
+  .a_data_src_in(ex_wb_reg_data_wire[63:32]),  // From EX/WB register
   .b_data_src_in(inc_pc_wire),            // From PC INC adder
   .data_out(writeback_data_wire)          // To GPR data in AKA forward bus
 );
@@ -461,7 +461,11 @@ assign imm_value_out = id_is_reg_data_wire[31:0];     // Deprecation warning
 assign int_uop_out = int_uop_wire;                    // Deprecation warning
 assign vec_uop_out = vec_uop_wire;
 assign lsu_uop_out = lsu_uop_wire;
+
 // Pipeline registers outputs
 assign if_id_reg_data_out = if_id_reg_data_wire;
+assign id_is_reg_data_out = id_is_reg_data_wire;
+assign is_ex_reg_data_out = is_ex_reg_data_wire;
+assign ex_wb_reg_data_out = ex_wb_reg_data_wire;
 
 endmodule
