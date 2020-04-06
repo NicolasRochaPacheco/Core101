@@ -107,7 +107,7 @@ wire [31:0] inc_pc_wire;
 // --------------------------
 wire [63:0] if_id_reg_data_wire;    // IF/ID register
 wire [142:0] id_is_reg_data_wire;   // ID/IS register
-wire [31:0] is_ex_reg_data_wire;    // IS/EX register
+wire [122:0] is_ex_reg_data_wire;   // IS/EX register
 wire [31:0] ex_wb_reg_wire;         // EX/WB register
 
 
@@ -172,9 +172,9 @@ REG #(.DATA_WIDTH(64)) if_id_reg (
 );
 
 
-// ========================================================
-// INSTRUCTION DECODE
-// ========================================================
+// --------------------------
+// Instruction decode stage
+// --------------------------
 
 // General purpose registers
 GPR gpr0 (
@@ -254,37 +254,41 @@ REG #(.DATA_WIDTH(143)) id_is_reg (
   .data_out(id_is_reg_data_wire)
 );
 
-// ========================================================
-// INSTRUCTION ISSUE
-// ========================================================
+// --------------------------
+// Instruction issue stage
+// --------------------------
 
-// Immediate value multiplexer
-MUX_A #(.DATA_WIDTH(32)) imm_mux (
-  // Multiplexer source select signal
-  .data_sel_in(imm_mux_sel_wire),
-
-  // Multiplexer inputs
-  .a_data_src_in(id_is_reg_data_wire[68:37]), // R[rs2]
-  .b_data_src_in(id_is_reg_data_wire[73:42]), // IMM
-
-  // Multiplexer output
-  .data_out(b_data_wire)
+// Forward MUX for RS1 and PC
+MUX_A #(.DATA_WIDTH(32)) is1_fwd_mux (
+  .data_sel_in(<from_pipeline_register>),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(writeback_data_wire),
+  .data_out(<to_pc_mux>)
 );
 
+// Forward MUX for IMM and RS2
+MUX_A #(.DATA_WIDTH(32)) is1_fwd_mux (
+  .data_sel_in(<from_pipeline_register>),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(writeback_data_wire),
+  .data_out(<to_imm_mux>)
+);
 
-// Program counter value multiplexer
+// MUX for choosing either PC or RS1
 MUX_A #(.DATA_WIDTH(32)) pc_mux (
-  // Multiplexer source select signal
   .data_sel_in(pc_mux_sel_wire),
-
-  // Multiplexer inputs
   .a_data_src_in(id_is_reg_data_wire[100:69]),  // R[rs1]
   .b_data_src_in(id_is_reg_data_wire[31:0]),    // PC
-
-  // Multiplexer output
   .data_out(a_data_wire)
 );
 
+// MUX for choosing either IMM or RS2
+MUX_A #(.DATA_WIDTH(32)) imm_mux (
+  .data_sel_in(imm_mux_sel_wire),
+  .a_data_src_in(id_is_reg_data_wire[68:37]), // R[rs2]
+  .b_data_src_in(id_is_reg_data_wire[73:42]), // IMM
+  .data_out(b_data_wire)
+);
 
 // Issue unit
 ISSUE_UNIT issue0 (
@@ -303,68 +307,79 @@ ISSUE_UNIT issue0 (
   .lsu_exec_uop_out(lsu_uop_wire)
 );
 
-// Instruction issue/execution pipeline register
-REG #(.DATA_WIDTH(32)) is_ex_reg (
+// IS/EX pipeline register
+REG #(.DATA_WIDTH(122)) is_ex_reg (
   .clock_in(clock_in),  // Clock input
   .reset_in(reset_in),  // Reset input
-  .set_in(),    // Set signal input
-  .data_in(),
-  .data_out()
+  .set_in(1'b1),        // Set signal input
+  .data_in({  id_is_reg_data_wire[148:143],
+              int_enable_wire,
+              lsu_result_wire,
+              vec_enable_wire,
+              int_uop_wire,
+              lsu_uop_wire,
+              vec_uop_wire,
+              id_is_reg_data_wire[78:74],
+              b_data_wire,
+              a_data_wire,
+              id_is_reg_data_wire[31:0]}),
+  .data_out(is_ex_reg_data_wire)
 );
 
-// ========================================================
-// EXECUTION
-// ========================================================
+
+// --------------------------
+// Execution stage
+// --------------------------
 
 // Forward value multiplexer for data source A on INT execution unit.
-MUX_A #(.DATA_WIDTH(32)) int_a_src_mux (
+MUX_A #(.DATA_WIDTH(32)) ex0_fwd_mux (
   .data_sel_in(<from_pipeline_register>),
   .a_data_src_in(<from_pipeline_register>),
-  .b_data_src_in(<from_forward_bus>),
+  .b_data_src_in(writeback_data_wire),
   .data_out(int_a_src_data_wire)
 );
 
 // Forward value multiplexer for data source B on INT execution unit.
-MUX_A #(.DATA_WIDTH(32)) int_b_src_mux (
+MUX_A #(.DATA_WIDTH(32)) ex1_fwd_mux (
   .data_sel_in(<from_pipeline_register>),
   .a_data_src_in(<from_pipeline_register>),
-  .b_data_src_in(<from_forward_bus>),
+  .b_data_src_in(writeback_data_wire),
   .data_out(int_b_src_data_wire)
 );
 
 // Forward value multiplexer for data source A on LSU execution unit.
-MUX_A #(.DATA_WIDTH(32)) lsu_a_src_mux (
+MUX_A #(.DATA_WIDTH(32)) ex2_fwd_mux (
   .data_sel_in(<from_pipeline_register>),
   .a_data_src_in(<from_pipeline_register>),
-  .b_data_src_in(<from_forward_bus>),
+  .b_data_src_in(writeback_data_wire),
   .data_out(lsu_a_src_data_wire)
 );
 
 // Forward value multiplexer for data source B on LSU execution unit.
-MUX_A #(.DATA_WIDTH(32)) lsu_b_src_mux (
+MUX_A #(.DATA_WIDTH(32)) ex3_fwd_mux (
   .data_sel_in(<from_pipeline_register>),
   .a_data_src_in(<from_pipeline_register>),
-  .b_data_src_in(<from_forward_bus>),
+  .b_data_src_in(writeback_data_wire),
   .data_out(lsu_b_src_data_wire)
 );
 
 // Forward value multiplexer for data source A on VEC execution unit.
-MUX_A #(.DATA_WIDTH(32)) vec_a_src_mux (
+MUX_A #(.DATA_WIDTH(32)) ex4_fwd_mux (
   .data_sel_in(<from_pipeline_register>),
   .a_data_src_in(<from_pipeline_register>),
-  .b_data_src_in(<from_forward_bus>),
+  .b_data_src_in(writeback_data_wire),
   .data_out(vec_a_src_data_wire)
 );
 
 // Forward value multiplexer for data source B on VEC execution unit.
-MUX_A #(.DATA_WIDTH(32)) vec_b_src_mux (
+MUX_A #(.DATA_WIDTH(32)) ex5_fwd_mux (
   .data_sel_in(<from_pipeline_register>),
   .a_data_src_in(<from_pipeline_register>),
-  .b_data_src_in(<from_forward_bus>),
+  .b_data_src_in(writeback_data_wire),
   .data_out(vec_b_src_data_wire)
 );
 
-// Execution units
+// Integer execution unit
 INT_EXEC int0 (
   .a_data_in(int_a_src_data_wire),
   .b_data_in(int_b_src_data_wire),
@@ -375,50 +390,54 @@ INT_EXEC int0 (
   .res_data_out(int_result_wire) // Must go to an output MUX
 );
 
+// Load/Store unit
 // LSU_EXEC lsu0 (
 
 
 // );
 
-
+// Vector execution unit
 // VEC_EXEC vec0 (
 
 
 // );
 
-
+// EX output MUX to select the appropiate output value
 MUX_B #(.DATA_WIDTH(32)) ex_out_mux (
-  .data_sel_in(<from_dec_unit>),
-  .a_data_src_in(<from_ieu>),
-  .b_data_src_in(<from_lsu>),
-  .c_data_src_in(<from_veu>),
-  .d_data_src_in(32'h00000000),
-  .data_out(<to_pipeline_register>)
+  .data_sel_in(<from_ex_dec_unit>),   //! MUX selection bus
+  .a_data_src_in(int_result_wire),    // INT result data input
+  .b_data_src_in(lsu_result_wire),    // LSU result data input
+  .c_data_src_in(vec_result_wire),    // VEC result data input
+  .d_data_src_in(32'h00000000),       // Unused data input
+  .data_out(ex_result_wire)           // EX output data
 );
 
+// EX/WB pipeline register
 REG #(.DATA_WIDTH(64)) ex_wb_reg (
   .clock_in(clock_in),                  // Clock input
   .reset_in(reset_in),                  // Reset input
-  .set_in(<from_main_control_unit>),    // Set signal input
-  .data_in(<from_ex>),
-  .data_out(ex_wb_reg_wire)
+  .set_in(<from_main_control_unit>),    //! Set signal input
+  .data_in(<from_ex>),                  //! Data input for pipeline REG
+  .data_out(ex_wb_reg_wire)             // Data output for pipeline REG
 );
 
 // --------------------------
-// Register writeback
+// Register writeback stage
 // --------------------------
 
+// Adder to do a PC increment
 ADDER #(.DATA_WIDTH(32)) wb_pc_inc (
-  .a_operand_in(),              // From EX/WB register
+  .a_operand_in(),              //! From EX/WB register
   .b_operand_in(32'h00000004),  // Fixed on 4
   .add_result_out(inc_pc_wire)  // To WB mux
 );
 
+// MUX to select the value that will be stored on RD
 MUX_A #(.DATA_WIDTH(32)) wb_rd_mux (
-  .data_sel_in(),                 // From EX/WB register
-  .a_data_src_in(),               // From EX/WB register
+  .data_sel_in(),                 //! From EX/WB register
+  .a_data_src_in(),               //! From EX/WB register
   .b_data_src_in(inc_pc_wire),    // From PC INC adder
-  .data_out(writeback_data_wire)  // To GPR data in
+  .data_out(writeback_data_wire)  // To GPR data in AKA forward bus
 );
 
 
