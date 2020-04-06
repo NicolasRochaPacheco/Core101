@@ -37,6 +37,8 @@ module Core101_top(
   // ================================================================
   output [63:0] if_id_reg_data_out,
   output [142:0] id_is_reg_data_out,
+  output [122:0] is_ex_reg_data_out,
+  output [69:0] ex_wb_reg_data_out,
   // ================================================================
 
   // Ins. mem. interface
@@ -108,7 +110,7 @@ wire [31:0] inc_pc_wire;
 wire [63:0] if_id_reg_data_wire;    // IF/ID register
 wire [142:0] id_is_reg_data_wire;   // ID/IS register
 wire [122:0] is_ex_reg_data_wire;   // IS/EX register
-wire [31:0] ex_wb_reg_wire;         // EX/WB register
+wire [69:0] ex_wb_reg_wire;         // EX/WB register
 
 
 // ========================================================
@@ -308,11 +310,12 @@ ISSUE_UNIT issue0 (
 );
 
 // IS/EX pipeline register
-REG #(.DATA_WIDTH(122)) is_ex_reg (
+REG #(.DATA_WIDTH(123)) is_ex_reg (
   .clock_in(clock_in),  // Clock input
   .reset_in(reset_in),  // Reset input
   .set_in(1'b1),        // Set signal input
-  .data_in({  id_is_reg_data_wire[148:143],
+  .data_in({  id_is_reg_data_wire[122],
+              id_is_reg_data_wire[148:143],
               int_enable_wire,
               lsu_result_wire,
               vec_enable_wire,
@@ -413,11 +416,14 @@ MUX_B #(.DATA_WIDTH(32)) ex_out_mux (
 );
 
 // EX/WB pipeline register
-REG #(.DATA_WIDTH(64)) ex_wb_reg (
+REG #(.DATA_WIDTH(69)) ex_wb_reg (
   .clock_in(clock_in),                  // Clock input
   .reset_in(reset_in),                  // Reset input
-  .set_in(<from_main_control_unit>),    //! Set signal input
-  .data_in(<from_ex>),                  //! Data input for pipeline REG
+  .set_in(1'b1),                        //! Set signal input
+  .data_in({  is_ex_reg_data_wire[122],
+              is_ex_reg_data_wire[100:96],
+              ex_result_wire,
+              is_ex_reg_data_wire[31:0]}),
   .data_out(ex_wb_reg_wire)             // Data output for pipeline REG
 );
 
@@ -427,17 +433,17 @@ REG #(.DATA_WIDTH(64)) ex_wb_reg (
 
 // Adder to do a PC increment
 ADDER #(.DATA_WIDTH(32)) wb_pc_inc (
-  .a_operand_in(),              //! From EX/WB register
-  .b_operand_in(32'h00000004),  // Fixed on 4
-  .add_result_out(inc_pc_wire)  // To WB mux
+  .a_operand_in(ex_wb_reg_wire[31:0]),  // From EX/WB register
+  .b_operand_in(32'h00000004),          // Fixed on 4
+  .add_result_out(inc_pc_wire)          // To WB mux
 );
 
 // MUX to select the value that will be stored on RD
 MUX_A #(.DATA_WIDTH(32)) wb_rd_mux (
-  .data_sel_in(),                 //! From EX/WB register
-  .a_data_src_in(),               //! From EX/WB register
-  .b_data_src_in(inc_pc_wire),    // From PC INC adder
-  .data_out(writeback_data_wire)  // To GPR data in AKA forward bus
+  .data_sel_in(ex_wb_reg_wire[69]),       // From EX/WB register
+  .a_data_src_in(ex_wb_reg_wire[63:32]),  // From EX/WB register
+  .b_data_src_in(inc_pc_wire),            // From PC INC adder
+  .data_out(writeback_data_wire)          // To GPR data in AKA forward bus
 );
 
 
