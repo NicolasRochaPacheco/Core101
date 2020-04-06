@@ -16,13 +16,13 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/ISSUE/ISSUE_UNIT.v \
 				$(CUR_DIR)/rtl/EX/INT_EXEC.v \
 				$(CUR_DIR)/rtl/EX/ALU.v \
-				$(CUR_DIR)/rtl/misc/ADDER.v \
-				$(CUR_DIR)/rtl/misc/MUX_A.v \
-				$(CUR_DIR)/rtl/misc/MUX_B.v \
-				$(CUR_DIR)/rtl/misc/MUX_F.v \
-				$(CUR_DIR)/rtl/misc/DECODE_F.v \
-				$(CUR_DIR)/rtl/misc/REG.v \
-				$(CUR_DIR)/rtl/misc/REG_NEG.v
+				$(CUR_DIR)/rtl/MISC/ADDER.v \
+				$(CUR_DIR)/rtl/MISC/MUX_A.v \
+				$(CUR_DIR)/rtl/MISC/MUX_B.v \
+				$(CUR_DIR)/rtl/MISC/MUX_F.v \
+				$(CUR_DIR)/rtl/MISC/DECODE_F.v \
+				$(CUR_DIR)/rtl/MISC/REG.v \
+				$(CUR_DIR)/rtl/MISC/REG_NEG.v
 
 CPATH = $(CUR_DIR)/src/core101_testbench.cpp
 
@@ -35,13 +35,13 @@ Core101:
 # Verilator test with a single module with its testbench
 adder:
 	echo 'Building a single adder'
-	$(VERILATOR) -Wall -cc $(CUR_DIR)/rtl/misc/ADDER.v --exe $(CUR_DIR)/src/adder_testbench.cpp -I$(I_DIR)
+	$(VERILATOR) -Wall -cc $(CUR_DIR)/rtl/MISC/ADDER.v --exe $(CUR_DIR)/src/adder_testbench.cpp -I$(I_DIR)
 	make -j -C obj_dir -f VADDER.mk
 
 # Verilator test with a composed moule with its testbench
 cascade:
 	echo 'Building a cascade adder'
-	$(VERILATOR) -Wall -cc $(CUR_DIR)/rtl/misc/CASCADE.v $(CUR_DIR)/rtl/misc/ADDER.v --exe $(CUR_DIR)/src/cascade_testbench.cpp
+	$(VERILATOR) -Wall -cc $(CUR_DIR)/rtl/MISC/CASCADE.v $(CUR_DIR)/rtl/MISC/ADDER.v --exe $(CUR_DIR)/src/cascade_testbench.cpp
 	make -j -C obj_dir -f VCASCADE.mk
 
 clean:
