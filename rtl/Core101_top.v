@@ -50,7 +50,9 @@ module Core101_top(
   input mem_valid_in
 );
 
-// WIRE DEFINITION
+// ========================================================
+//                      WIRE DEFINITION
+// ========================================================
 
 // Control signals wires
 wire pc_set_wire;  // PC set signal
@@ -70,32 +72,53 @@ wire [31:0] rs2_data_wire;
 wire [31:0] rd_data_wire;
 wire [31:0] imm_value_wire;
 
+// --------------------------
 // Issue wires
+// --------------------------
 wire [31:0] a_data_wire; // Either R[rs1] or pc value
 wire [31:0] b_data_wire; // Either R[rs2] or imm value
 
-// Execution unit enable wires
-wire int_enable_wire;
-wire vec_enable_wire;
-wire lsu_enable_wire;
 
-// uOP data wires
-wire [3:0] int_uop_wire;
-wire [3:0] vec_uop_wire;
-wire [3:0] lsu_uop_wire;
+// --------------------------
+// Execution wires
+// --------------------------
+wire [3:0] int_uop_wire; // INT uOP wire
+wire [3:0] vec_uop_wire; // VEC uOP wire
+wire [3:0] lsu_uop_wire; // LSU uOP wire
+wire [31:0] int_a_src_data_wire; // INT A data src wire
+wire [31:0] int_b_src_data_wire; // INT B data src wire
+wire [31:0] lsu_a_src_data_wire; // LSU A data src wire
+wire [31:0] lsu_b_src_data_wire; // LSU B data src wire
+wire [31:0] vec_a_src_data_wire; // VEC A data src wire
+wire [31:0] vec_b_src_data_wire; // VEC B data src wire
+wire [31:0] int_result_wire; // INT result wire
+wire [31:0] lsu_result_wire; // LSU result wire
+wire [31:0] vec_result_wire; // VEC result wire
+wire [1:0] result_sel_wire; // Output MUX selection wire
+wire [31:0] ex_result_wire; // EX result wire
 
+// --------------------------
+// Writeback wires
+// --------------------------
+wire [31:0] writeback_data_wire;
+wire [31:0] inc_pc_wire;
+
+// --------------------------
 // Pipeline registers wires
-wire [63:0] if_id_reg_data_wire;
-wire [142:0] id_is_reg_data_wire;
+// --------------------------
+wire [63:0] if_id_reg_data_wire;    // IF/ID register
+wire [142:0] id_is_reg_data_wire;   // ID/IS register
+wire [31:0] is_ex_reg_data_wire;    // IS/EX register
+wire [31:0] ex_wb_reg_wire;         // EX/WB register
 
 
 // ========================================================
 //                      INSTANCE DEFINITION
 // ========================================================
-// INSTRUCTON FETCH
+// INSTRUCTON FETCH STAGE
 // ========================================================
 
-// Main memory definition. Temporal module. Acts as the main memory
+// Main memory definition. Temporal module. Acts as the main memory.
 MAIN_MEMORY mem0(
   .main_mem_addr_in(pc_addr_wire),
 
@@ -208,7 +231,6 @@ IMM_GEN imm_gen0 (
 
 
 // Instruction decode/instruction issue (ID/IS) pipeline register
-// rs1_data(32b); rs2_data(32b); rd_addr(5b); imm(32b);
 REG #(.DATA_WIDTH(143)) id_is_reg (
   // Clock and reset inputs
   .clock_in(clock_in),
@@ -283,10 +305,9 @@ ISSUE_UNIT issue0 (
 );
 
 // Instruction issue/execution pipeline register
-//
 REG #(.DATA_WIDTH(32)) is_ex_reg (
-  .clock_in(),  // Clock input
-  .reset_in(),  // Reset input
+  .clock_in(clock_in),  // Clock input
+  .reset_in(reset_in),  // Reset input
   .set_in(),    // Set signal input
   .data_in(),
   .data_out()
@@ -302,53 +323,66 @@ MUX_A #(.DATA_WIDTH(32)) int_a_src_mux (
   .data_sel_in(<from_pipeline_register>),
 
   // Multiplexer inputs
-  .a_data_src_in(),
+  .a_data_src_in(<from_pipeline_register>),
   .b_data_src_in(<from_forward_bus>),
 
   // Multiplexer output
-  .data_out(<to_ieu_data_src_a>)
+  .data_out(int_a_src_data_wire)
 );
 
 // Forward value multiplexer for data source A on INT execution unit.
 MUX_A #(.DATA_WIDTH(32)) int_b_src_mux (
   // Multiplexer source select signal
-  .data_sel_in(),
+  .data_sel_in(<from_pipeline_register>),
 
   // Multiplexer inputs
-  .a_data_src_in(),
-  .b_data_src_in(),
+  .a_data_src_in(<from_pipeline_register>),
+  .b_data_src_in(<from_forward_bus>),
 
   // Multiplexer output
-  .data_out()
+  .data_out(int_b_src_data_wire)
 );
 
 
 // Execution units
 INT_EXEC int0 (
-  .a_data_in(),
-  .b_data_in(),
+  .a_data_in(int_a_src_data_wire),
+  .b_data_in(int_b_src_data_wire),
 
-  .enable_in(),
-  .uop_in(),
+  .enable_in(<from_pipeline_register>),
+  .uop_in(<from_pipeline_register>),
 
-  .res_data_out() // Must go to an output MUX
+  .res_data_out(<to_pipeline_register>) // Must go to an output MUX
 );
 
-//LSU_EXEC lsu0 (
+// LSU_EXEC lsu0 (
 
 
-//);
+// );
 
 
-//VEC_EXEC vec0
+// VEC_EXEC vec0 (
+
+
+// );
+
+
+MUX_B #(.DATA_WIDTH(32)) ex_out_mux (
+  .data_sel_in(<from_dec_unit>),
+  .a_data_src_in(<from_ieu>),
+  .b_data_src_in(<from_lsu>),
+  .c_data_src_in(<from_veu>),
+  .d_data_src_in(32'h00000000),
+  .data_out(<to_pipeline_register>)
+);
 
 // Execution/writeback pipeline register
 REG #(.DATA_WIDTH(64)) ex_wb_reg (
-  .clock_in(),  // Clock input
-  .reset_in(),  // Reset input
-  .set_in(),    // Set signal input
-  .data_in(),
-  .data_out()
+  .clock_in(clock_in),  // Clock input
+  .reset_in(reset_in),  // Reset input
+  .set_in(<from_pipeline_register>),    // Set signal input
+  .data_in(<from_ex>),
+  .data_out(<to_wb>)
 );
 
 
@@ -356,7 +390,7 @@ REG #(.DATA_WIDTH(64)) ex_wb_reg (
 // REGISTER WRITEBACK
 // ========================================================
 
-// Some Muxes
+
 
 
 
