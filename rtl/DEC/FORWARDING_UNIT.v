@@ -35,13 +35,26 @@ always@(*) begin
   // Sets every signal on zero
   fwd_mux_sel_wire = 10'b00000000;
 
-  // Logic for RS1
-  if(rs1_addr_in == rd1_addr_in)  // Compares ID-IS
-    fwd_mux_sel_wire[0] = 1'b1;   // Enables on EX
-  if(rs1_addr_in == rd2_addr_in)  // Compares ID-EX
-    fwd_mux_sel_wire[0] = 1'b1;   // Enables on IS
-  if(rs1_addr_in == rd3_addr_in)  // Compares ID-WB
-    fwd_mux_sel_wire[0] = 1'b1;   // Enables on ID
+  if(rd1_addr_in != 5'b00000) begin
+    if(rs1_addr_in == rd1_addr_in)    // Compares ID-IS
+      fwd_mux_sel_wire[5:3] = 3'b111; // Enables on EX0,
+    if(rs2_addr_in == rd1_addr_in)    // Compares ID-IS
+      fwd_mux_sel_wire[2:0] = 3'b111; // Enables on EX_
+  end
+
+  if(rd2_addr_in != 5'b00000) begin
+    if(rs1_addr_in == rd2_addr_in)  // Compares IS-EX
+      fwd_mux_sel_wire[7] = 1'b1;   // Enables on IS0
+    if(rs2_addr_in == rd2_addr_in)  // Compares IS-EX
+      fwd_mux_sel_wire[6] = 1'b1;   // Enables on IS1
+  end
+
+  if(rd3_addr_in != 5'b00000) begin
+    if(rs1_addr_in == rd3_addr_in)  // Compares EX-WB
+      fwd_mux_sel_wire[9] = 1'b1;   // Enables on ID0
+    if(rs2_addr_in == rd3_addr_in)  // Compares EX-WB
+      fwd_mux_sel_wire[8] = 1'b1;   // Enables on ID1
+  end
 end
 
 // ========================================================
