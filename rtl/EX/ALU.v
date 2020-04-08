@@ -53,6 +53,8 @@ wire [DATA_WIDTH-1:0] alu_result_wire;
 always@(*) begin
   case(uop_in)
     4'b0000: alu_result_wire = a_data_in + b_data_in;
+    4'b0001: alu_result_wire = a_data_in - b_data_in;
+    4'b0011: alu_result_wire = a_data_in&b_data_in;
     default: alu_result_wire = 32'h00000000;
   endcase
 end
