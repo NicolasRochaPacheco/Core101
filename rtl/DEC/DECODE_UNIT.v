@@ -111,7 +111,7 @@ always@(*) begin
                 case(funct3_in)
                   3'b000: if (funct7_in == 7'b0000000)
                               exec_uop_reg = 4'b0000; // ADD on INT_EXEC
-                          else
+                          else if (funct7_in == 7'b0100000)
                               exec_uop_reg = 4'b0001; // SUB on INT_EXEC
                   3'b001: exec_uop_reg = 4'b1111;     // SLL on INT_EXEC
                   3'b010: exec_uop_reg = 4'b1010;     // SLT on INT_EXEC
