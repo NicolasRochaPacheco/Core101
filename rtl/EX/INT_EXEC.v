@@ -29,8 +29,7 @@ module INT_EXEC (
 
   // RES data output
   output [31:0] res_data_out
-
-  );
+);
 
 
 // ==============================================
@@ -56,10 +55,14 @@ module INT_EXEC (
 
 
 // ==============================================
-// REGISTERS DEFINITION
+// INSTANCE DEFINITION
 // ==============================================
-reg [31:0] res_data_reg;
-
+ALU #(.DATA_WIDTH(32)) alu0 (
+  .a_data_in(a_data_in),
+  .b_data_in(b_data_in),
+  .uop_in(uop_in),
+  .result_out(res_data_out)
+);
 
 
 endmodule
