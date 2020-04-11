@@ -46,6 +46,7 @@ always @ (*) begin
     LOAD:   imm_wire = {{21{instruction_in[24]}}, instruction_in[23:13]};
     OPIMM:  imm_wire = {{21{instruction_in[24]}}, instruction_in[23:13]};
     AUIPC:  imm_wire = {instruction_in[24:5], {12{1'b0}}};
+    BRANCH: imm_wire = {{20{instruction_in[24]}}, instruction_in[0], instruction_in[23:18], instruction_in[4:1], 1'b0};
     default: imm_wire = 32'h00000000;
   endcase
 end

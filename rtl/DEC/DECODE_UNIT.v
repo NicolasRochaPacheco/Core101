@@ -31,7 +31,11 @@ module DECODE_UNIT (
   output imm_mux_sel_out,
 
   // Exceptions signals
-  output invalid_ins_exception
+  output invalid_ins_exception,
+
+  // HALT signal out
+  output halt_out,
+  output [3:0] clock_count_halt_out
 );
 
 // ==========================
@@ -65,6 +69,7 @@ parameter OPV = 5'b10101;    // E
 
 // Execution unit selection
 parameter INT_EXEC_SEL = 3'b001;
+parameter BRU_EXEC_SEL = 3'b011;
 parameter LSU_EXEC_SEL = 3'b010;
 parameter VEC_EXEC_SEL = 3'b100;
 // ====================================
@@ -78,6 +83,9 @@ reg [3:0] exec_uop_reg;
 reg pc_mux_sel_reg;
 reg imm_mux_sel_reg;
 // ====================================
+
+wire [3:0] clock_count_halt_wire;
+wire halt_wire;
 
 
 // ====================================
@@ -97,7 +105,7 @@ always@(*) begin
     AUIPC:    exec_sel_reg = INT_EXEC_SEL;
     OP:       exec_sel_reg = INT_EXEC_SEL;
     LUI:      exec_sel_reg = INT_EXEC_SEL;
-    BRANCH:   exec_sel_reg = INT_EXEC_SEL;
+    BRANCH:   exec_sel_reg = BRU_EXEC_SEL;
     JAL:      exec_sel_reg = INT_EXEC_SEL;
     JALR:     exec_sel_reg = INT_EXEC_SEL;
     SYSTEM:   exec_sel_reg = INT_EXEC_SEL;
@@ -161,13 +169,13 @@ always@(*) begin
 
     // BRANCH opcode
     BRANCH:   case(funct3_in)
-                3'b000:   exec_uop_reg = 4'b0000; // BEQ on ???
-                3'b001:   exec_uop_reg = 4'b0000; // BNE on ???
-                3'b100:   exec_uop_reg = 4'b0000; // BLT on ???
-                3'b101:   exec_uop_reg = 4'b0000; // BGE on ???
-                3'b110:   exec_uop_reg = 4'b0000; // BLTU on ???
-                3'b111:   exec_uop_reg = 4'b0000; // BGEU on ???
-                default:  exec_uop_reg = 4'b0000; // funct3 not valid. Raises exception.
+                3'b000:   exec_uop_reg = 4'b0000; // BEQ on BRU_EXEC
+                3'b001:   exec_uop_reg = 4'b0001; // BNE on BRU_EXEC
+                3'b100:   exec_uop_reg = 4'b0010; // BLT on BRU_EXEC
+                3'b101:   exec_uop_reg = 4'b0011; // BGE on BRU_EXEC
+                3'b110:   exec_uop_reg = 4'b0110; // BLTU on BRU_EXEC
+                3'b111:   exec_uop_reg = 4'b0111; // BGEU on BRU_EXEC
+                default:  exec_uop_reg = 4'b1000; // funct3 not valid. Raises exception.
               endcase
 
     // LUI opcode
@@ -200,8 +208,19 @@ always@(*) begin
     JALR:     imm_mux_sel_reg = 1'b1;
     AUIPC:    imm_mux_sel_reg = 1'b1;
     LUI:      imm_mux_sel_reg = 1'b1;
+    BRANCH:   imm_mux_sel_reg = 1'b1;
     default:  imm_mux_sel_reg = 1'b0; // E.E.
   endcase
+
+  // Halts the IFU for three cycles if a branch is decoded
+  if(opcode_in == BRANCH) begin
+    clock_count_halt_wire = 4'b0010;
+    halt_wire = 1'b1;
+  end
+  else begin
+    clock_count_halt_wire = 4'b0000;
+    halt_wire = 1'b0;
+  end
 end
 
 
@@ -217,5 +236,8 @@ assign pc_mux_sel_out = pc_mux_sel_reg;
 
 // Immediate value selection output
 assign imm_mux_sel_out = imm_mux_sel_reg;
+
+assign clock_count_halt_out = clock_count_halt_wire;
+assign halt_out = halt_wire;
 
 endmodule
