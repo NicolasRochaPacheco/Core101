@@ -5,17 +5,17 @@
 #include "VCore101_top.h"
 
 // This will be stored on a simulation file
-void print_sim_status(int data[18]){
+void print_sim_status(int data[21]){
   std::printf("CC%03i, ", data[0]);  // Clock cycle value
   std::printf("%08X, ", data[1]); // PC on IF/ID
   std::printf("%08X, ", data[2]); // PC on ID/IS
   std::printf("%08X, ", data[3]); // PC on IS/EX
   std::printf("%08X, ", data[4]); // PC on EX/WB
-  std::printf("%02i, ", data[5]);
+  std::printf("%02i, ", data[5]); // RD addr on IF/ID
   std::printf("%02i, ", data[6]);
   std::printf("%02i, ", data[7]);
   std::printf("%02i, ", data[8]);
-  std::printf("%05i, ", data[9]);
+  std::printf("%05i, ", data[9]);   // IMM value
   std::printf("%05i, ", data[10]);
   std::printf("%05i, ", data[11]);
   std::printf("%05i, ", data[12]);
@@ -24,6 +24,9 @@ void print_sim_status(int data[18]){
   std::printf("%05i, ", data[15]);
   std::printf("%01i, ", data[16]);
   std::printf("%05i, ", data[17]); // Data to be written on RD
+  std::printf("%01i, ", data[18]);
+  std::printf("%01i, ", data[19]);
+  std::printf("%01i, ", data[20]);
   std::cout << std::endl;
 }
 
@@ -37,7 +40,7 @@ int main(int argc, char **argv){
   VCore101_top* core = new VCore101_top;
 
   // Clock signal parameters
-  const int N_CLOCKS = 16;
+  const int N_CLOCKS = 32;
   const int RESOLUTION = 2;
 
   int clock_arr[N_CLOCKS*RESOLUTION];
@@ -68,7 +71,12 @@ int main(int argc, char **argv){
 
     // Resets the core
     if (cc_val < 5){
-      core->reset_in = 1;
+      if ( clock_arr[k] == 0 && cc_val == 4 ){
+        core->reset_in = 0;
+      }
+      else {
+        core->reset_in = 1;
+      }
     } else {
       core->reset_in = 0;
     }
@@ -86,7 +94,7 @@ int main(int argc, char **argv){
     core->eval();
 
     // An array to store outputs from the core as the simulation runs.
-    int data[18];
+    int data[21];
 
     data[0] = cc_val; // Clock cycle value.
     data[1] = (int) core->pc_data_if_id_out;  // PC value on IF/ID
@@ -106,6 +114,9 @@ int main(int argc, char **argv){
     data[15] = (int) core->int_ex_b_src_data_out;
     data[16] = (int) core->int_uop_out;
     data[17] = (int) core->wb_data_out;
+    data[18] = (int) core->ifu_mux_sel_out;
+    data[19] = (int) core->ifu_ctrl_data_out;
+    data[20] = (int) core->exec_unit_sel_out;
 
 
     // Prints simulation status on screen
