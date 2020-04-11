@@ -41,8 +41,11 @@ module Core101_top(
   output [31:0] int_ex_a_src_data_out,
   output [31:0] int_ex_b_src_data_out,
   output [3:0] int_uop_out,
-
   output [2:0] exec_unit_sel_out,
+  output [1:0] ifu_mux_sel_out,
+  output [1:0] ifu_ctrl_data_out,
+
+
   output [4:0] gpr_a_out,
   output [4:0] gpr_b_out,
   output [4:0] gpr_rd_out,
@@ -87,6 +90,8 @@ wire [31:0] rs1_data_wire;
 wire [31:0] rs2_data_wire;
 wire [31:0] imm_value_wire;
 wire [9:0] fwd_mux_sel_wire;
+wire halt_wire;
+wire [3:0] halt_clock_count_wire;
 
 // --------------------------
 // Issue wires
@@ -95,6 +100,7 @@ wire [31:0] is_rs1_data_wire;
 wire [31:0] is_rs2_data_wire;
 wire [31:0] a_data_wire; // Either R[rs1] or pc value
 wire [31:0] b_data_wire; // Either R[rs2] or imm value
+wire [1:0] ifu_mux_sel_wire;
 wire int_enable_wire;
 wire lsu_enable_wire;
 wire vec_enable_wire;
@@ -134,7 +140,7 @@ wire [31:0] inc_pc_wire;
 // --------------------------
 wire [63:0] if_id_reg_data_wire;    // IF/ID register
 wire [150:0] id_is_reg_data_wire;   // ID/IS register
-wire [124:0] is_ex_reg_data_wire;   // IS/EX register
+wire [126:0] is_ex_reg_data_wire;   // IS/EX register
 wire [69:0] ex_wb_reg_data_wire;    // EX/WB register
 
 
@@ -157,29 +163,15 @@ IFU ifu0(
  .ifu_reset_in(reset_in),
 
  .pc_addr_in(32'h00000000),
- .pc_offset_in(32'h0000008),
+ .pc_offset_in(int_b_src_data_wire),
 
  .ir_data_in(ins_mem_data_wire),
  .pc_addr_out(pc_addr_wire),
  .ir_data_out(ir_data_wire),
 
  .pc_set_in(pc_set_wire),
- .pc_mux_sel_in(2'b10),
- .ir_set_in(1'b1)
-);
-
-// The IFU control unit. A state machine for enabling or halting the IFU
-IFU_CONTROL ifu_ctrl0 (
-  // Clock and reset signals
-  .ifu_ctrl_clock_in(clock_in),
-  .ifu_ctrl_reset_in(reset_in),
-
-  // Halt signal in
-  .halt_signal_in(halt_in),
-
-  // Control signals output
-  .ifu_ctrl_pc_set_out(pc_set_wire),
-  .ifu_ctrl_ir_set_out(ir_set_wire)
+ .pc_mux_sel_in(is_ex_reg_data_wire[126:125]),
+ .ir_set_in(ir_set_wire)
 );
 
 // Instruction fetch/instruction decode (IF/ID) pipeline register
@@ -249,7 +241,10 @@ DECODE_UNIT decode0 (
   .imm_mux_sel_out(imm_mux_sel_wire),
 
   // Invalid isntruction exception signal output
-  .invalid_ins_exception()
+  .invalid_ins_exception(),
+
+  .halt_out(halt_wire),
+  .clock_count_halt_out(halt_clock_count_wire)
 );
 
 FORWARDING_UNIT fwd_unit0 (
@@ -325,6 +320,15 @@ MUX_A #(.DATA_WIDTH(32)) imm_mux (
   .data_out(b_data_wire)
 );
 
+// Branch resolver unit
+BRU #(.DATA_WIDTH(32)) bru0 (
+  .rs1_data_in(is_rs1_data_wire),       // R[rs1] data input
+  .rs2_data_in(is_rs2_data_wire),       // R[rs2] data input
+  .sel_in(id_is_reg_data_wire[34:32]),
+  .uop_in(id_is_reg_data_wire[38:35]),  // uOP input
+  .pc_mux_sel_out(ifu_mux_sel_wire)     // IFU mux sel wire
+);
+
 // Issue unit
 ISSUE_UNIT issue0 (
   .exec_unit_sel_in(id_is_reg_data_wire[34:32]),  //
@@ -338,11 +342,12 @@ ISSUE_UNIT issue0 (
 );
 
 // IS/EX pipeline register
-REG #(.DATA_WIDTH(125)) is_ex_reg (
+REG #(.DATA_WIDTH(127)) is_ex_reg (
   .clock_in(clock_in),                        // Clock input
   .reset_in(reset_in),                        // Reset input
   .set_in(1'b1),                              // Set signal input
-  .data_in({  id_is_reg_data_wire[40],        //
+  .data_in({  ifu_mux_sel_wire,               // IFU selection wire
+              id_is_reg_data_wire[40],        //
               id_is_reg_data_wire[39],        //
               id_is_reg_data_wire[122],       //
               id_is_reg_data_wire[148:143],   //
@@ -502,6 +507,9 @@ assign is_b_src_data_out = b_data_wire;
 assign int_ex_a_src_data_out = int_a_src_data_wire;
 assign int_ex_b_src_data_out = int_b_src_data_wire;
 assign int_uop_out = is_ex_reg_data_wire[112:109];
+assign ifu_mux_sel_out = is_ex_reg_data_wire[126:125];
+assign exec_unit_sel_out = id_is_reg_data_wire[34:32];
+assign ifu_ctrl_data_out = {ir_set_wire, pc_set_wire};
 
 
 assign ins_mem_addr_out = if_id_reg_data_wire[31:0];  // Debug output for PC
@@ -509,7 +517,6 @@ assign ins_data_out = if_id_reg_data_wire[63:32];     // Deprecation warning
 assign gpr_a_out = ir_data_wire[19:15];               // Deprecation warning
 assign gpr_b_out = if_id_reg_data_wire[56:52];        // Deprecation warning
 assign gpr_rd_out = if_id_reg_data_wire[43:39];       // Deprecation warning
-assign exec_unit_sel_out = exec_unit_sel_wire;        // Deprecation warning
 assign imm_value_out = id_is_reg_data_wire[31:0];     // Deprecation warning
 assign vec_uop_out = vec_uop_wire;                    // Deprecation warning
 assign lsu_uop_out = lsu_uop_wire;                    // Deprecation warning

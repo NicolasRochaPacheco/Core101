@@ -14,6 +14,7 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/DEC/DECODE_UNIT.v \
 				$(CUR_DIR)/rtl/DEC/FORWARDING_UNIT.v \
 				$(CUR_DIR)/rtl/MEM/MAIN_MEMORY.v \
+				$(CUR_DIR)/rtl/ISSUE/BRU.v \
 				$(CUR_DIR)/rtl/ISSUE/ISSUE_UNIT.v \
 				$(CUR_DIR)/rtl/EX/INT_EXEC.v \
 				$(CUR_DIR)/rtl/EX/ALU.v \
