@@ -19,51 +19,31 @@
 //  MODULE DEFINITION
 //-----------------------------------------------
 module IFU (
-	// Clock and reset signal inputs
-	input ifu_clock_in,
-	input ifu_reset_in,
-
-	// Program counter data inputs
-  input [31:0] pc_addr_in,
-  input [31:0] pc_offset_in,
-
-  // Instruction register data inputs
-  input [31:0] ir_data_in,
-
-  // Program counter data output
-  output [31:0] pc_addr_out,
-
-  // Instruction register data output
-  output [31:0] ir_data_out,
-
-  // Control signals
-  input pc_set_in,
-  input [1:0] pc_mux_sel_in,
-  input ir_set_in
+	input ifu_clock_in, 				// Clock signal input
+	input ifu_reset_in,					// Reset signal input
+	input pc_set_in,						// PC set input
+	input ir_set_in,						// IR set input
+	input pc_mux_sel_in,				// PC mux selection signal input
+	input pc_branch_sel_in,			// PC branch MUX selection signal
+	input [31:0] pc_branch_in,	// PC branch input data
+  input [31:0] pc_addr_in,		// PC data input for jumps
+  input [31:0] ir_data_in,		// Instruction register data inputs
+  output [31:0] pc_addr_out,	// Program counter data output
+  output [31:0] ir_data_out 	// Instruction register data output
 );
-
 
 //-----------------------------------------------
 //  WIRE DEFINITION
 //-----------------------------------------------
-wire [31:0] pc_offset_wire; //
 wire [31:0] pc_inc_wire; //
+wire [31:0] pc_branch_mux_wire;
 wire [31:0] pc_src_wire; //
 wire [31:0] pc_addr_wire; //
-
+wire [31:0] ir_data_wire;
 
 //-----------------------------------------------
 //  MODULES INSTANTIATION
 //-----------------------------------------------
-ADDER #(.DATA_WIDTH(32)) offset_adder (
-	// Data inputs
-	.a_operand_in(pc_offset_in),
-	.b_operand_in(pc_addr_wire),
-
-	// Data outputs
-	.add_result_out(pc_offset_wire)
-);
-
 ADDER #(.DATA_WIDTH(32)) inc_adder (
 	// Data inputs
 	.a_operand_in(32'h00000004),
@@ -73,17 +53,22 @@ ADDER #(.DATA_WIDTH(32)) inc_adder (
 	.add_result_out(pc_inc_wire)
 );
 
-MUX_B #(.DATA_WIDTH(32)) pc_src_mux (
+MUX_A #(.DATA_WIDTH(32)) pc_src_mux (
 	// Data inputs
-	.a_data_src_in(pc_addr_in),
-	.b_data_src_in(pc_offset_wire),
-	.c_data_src_in(pc_inc_wire),
-	.d_data_src_in(32'h00000000),
+	.a_data_src_in(pc_inc_wire),
+	.b_data_src_in(pc_addr_in),
 
 	// Control inputs
 	.data_sel_in(pc_mux_sel_in),
 
 	// Data outputs
+	.data_out(pc_branch_mux_wire)
+);
+
+MUX_A #(.DATA_WIDTH(32)) branch_sel_mux (
+	.a_data_src_in(pc_branch_mux_wire),
+	.b_data_src_in(pc_branch_in),
+	.data_sel_in(pc_branch_sel_in),
 	.data_out(pc_src_wire)
 );
 
@@ -112,14 +97,16 @@ REG_NEG #(.DATA_WIDTH(32)) ir (
 	.set_in(ir_set_in),
 
 	// Data outputs
-	.data_out(ir_data_out)
+	.data_out(ir_data_wire)
 );
 
-assign pc_addr_out = pc_addr_wire;
 
 //-----------------------------------------------
 // OUTPUT LOGIC
 //-----------------------------------------------
+assign pc_addr_out = pc_addr_wire;
+assign ir_data_out = ir_data_wire;
+
 
 
 endmodule // IFU
