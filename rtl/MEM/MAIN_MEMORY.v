@@ -27,12 +27,17 @@ reg [31:0] data_out;
 reg [7:0] red_addr;
 
 initial begin
-  $readmemh("/opt/L0G1C101/Core101/rtl/MEM/mem_values.hex", memory);
+  $readmemh("/opt/L0G1C101/Core101/rtl/MEM/tp1.hex", memory);
 end
 
 always@(*) begin
   red_addr = main_mem_addr_in[7:0];
-  data_out = {memory[red_addr], memory[red_addr+1], memory[red_addr+2], memory[red_addr+3]};
+  // data_out = {memory[red_addr], memory[red_addr+1], memory[red_addr+2], memory[red_addr+3]};
+  data_out = {memory[red_addr+3],
+              memory[red_addr+2],
+              memory[red_addr+1],
+              memory[red_addr]};
+
 end
 
 assign main_mem_data_out = data_out;
