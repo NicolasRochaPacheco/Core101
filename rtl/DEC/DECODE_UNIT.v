@@ -31,11 +31,7 @@ module DECODE_UNIT (
   output imm_mux_sel_out,
 
   // Exceptions signals
-  output invalid_ins_exception,
-
-  // HALT signal out
-  output halt_out,
-  output [3:0] clock_count_halt_out
+  output invalid_ins_exception
 );
 
 // ==========================
@@ -211,16 +207,6 @@ always@(*) begin
     BRANCH:   imm_mux_sel_reg = 1'b1;
     default:  imm_mux_sel_reg = 1'b0; // E.E.
   endcase
-
-  // Halts the IFU for three cycles if a branch is decoded
-  if(opcode_in == BRANCH) begin
-    clock_count_halt_wire = 4'b0010;
-    halt_wire = 1'b1;
-  end
-  else begin
-    clock_count_halt_wire = 4'b0000;
-    halt_wire = 1'b0;
-  end
 end
 
 
@@ -236,8 +222,5 @@ assign pc_mux_sel_out = pc_mux_sel_reg;
 
 // Immediate value selection output
 assign imm_mux_sel_out = imm_mux_sel_reg;
-
-assign clock_count_halt_out = clock_count_halt_wire;
-assign halt_out = halt_wire;
 
 endmodule
