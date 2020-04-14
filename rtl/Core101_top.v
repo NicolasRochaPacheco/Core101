@@ -83,6 +83,7 @@ wire imm_mux_sel_wire;
 // --------------------------
 // Instruction fetch wires
 // --------------------------
+wire pc_pred_mux_sel_wire;
 wire [31:0] pc_pred_addr_wire;
 
 // --------------------------
@@ -108,6 +109,10 @@ wire lsu_enable_wire;
 wire vec_enable_wire;
 wire [3:0] pipeline_regs_enable_wire;
 wire [31:0] pc_upd_addr_wire;
+
+wire flush_wire;
+wire bru_feedback_wire;
+wire bru_taken_wire;
 
 // --------------------------
 // Execution wires
@@ -150,8 +155,8 @@ wire if_id_reset_wire;    // IF/ID reset wire
 wire id_is_reset_wire;
 wire is_ex_reset_wire;
 wire ex_wb_reset_wire;
-wire [63:0] if_id_reg_data_wire;    // IF/ID register
-wire [157:0] id_is_reg_data_wire;   // ID/IS register
+wire [64:0] if_id_reg_data_wire;    // IF/ID register
+wire [151:0] id_is_reg_data_wire;   // ID/IS register
 wire [125:0] is_ex_reg_data_wire;   // IS/EX register
 wire [69:0] ex_wb_reg_data_wire;    // EX/WB register
 
@@ -174,34 +179,35 @@ IFU ifu0(
  .ifu_reset_in(reset_in),
  .pc_set_in(1'b1),                // From ID/IS pipeline register
  .ir_set_in(1'b1),
- .pc_mux_sel_in(1'b0),
- .pc_branch_sel_in(1'b0),
- .pc_branch_in(32'h00000010),
- .pc_addr_in(32'h0000000C),
+ .pc_mux_sel_in(ifu_mux_sel_wire),
+ .pc_branch_sel_in(pc_pred_mux_sel_wire),
+ .pc_branch_in(pc_pred_addr_wire),
+ .pc_addr_in(pc_upd_addr_wire),
  .ir_data_in(ins_mem_data_wire),
  .pc_addr_out(pc_addr_wire),
  .ir_data_out(ir_data_wire)
 );
 
 PREDICTOR pred0 (
-  .clock_in(clock_in),
-  .feedback_enable_in(),      // From BRU (IS/EX)
-  .pc_indx_branch_in(),       // From BRU (IS/EX)
-  .ins_data_in(ir_data_wire), // IR data input
-  .pc_addr_in(pc_addr_wire),  // PC addr input
-  .taken_branch_in(),         // From BRU (IS/EX)
-  .taken_pred_out(),          // To IF/ID
-  .pc_branch_sel_out(),           // TO IFU
-  .pred_pc_out(pc_pred_addr_wire) // To IFU
+  .clock_in(clock_in),                        // Clock input
+  .reset_in(reset_in),                        // Reset input signal
+  .feedback_enable_in(bru_feedback_wire),     // From BRU (IS/EX)
+  .pc_indx_branch_in(id_is_reg_data_wire[9:0]),  // From BRU (IS/EX)
+  .ins_data_in(ir_data_wire),                 // IR data input
+  .pc_addr_in(pc_addr_wire),                  // PC addr input
+  .taken_branch_in(bru_taken_wire),           // From BRU (IS/EX)
+  .taken_pred_out(pc_pred_mux_sel_wire),      // To IF/ID
+  .pred_pc_out(pc_pred_addr_wire)             // To IFU
 );
 
 // Instruction fetch/instruction decode (IF/ID) pipeline register
-REG #(.DATA_WIDTH(64)) if_id_reg (
+REG #(.DATA_WIDTH(65)) if_id_reg (
   .clock_in(clock_in),
-  .reset_in(reset_in),   //
-  .set_in(1'b1),              // From ID/IS pipeline register
-  .data_in( {ir_data_wire,
-            pc_addr_wire}),
+  .reset_in(reset_in|flush_wire),   //
+  .set_in(1'b1),                    //
+  .data_in( { pc_pred_mux_sel_wire,
+              ir_data_wire,
+              pc_addr_wire}),
   .data_out(if_id_reg_data_wire)
 );
 
@@ -280,14 +286,11 @@ IMM_GEN imm_gen0 (
 );
 
 // Instruction decode/instruction issue (ID/IS) pipeline register
-REG #(.DATA_WIDTH(158)) id_is_reg (
+REG #(.DATA_WIDTH(152)) id_is_reg (
   .clock_in(clock_in),
   .reset_in(reset_in),
   .set_in(1'b1),
-  .data_in({pipeline_regs_enable_wire,
-            pc_set_wire,
-            ir_set_wire,
-            if_id_reset_wire,
+  .data_in({if_id_reg_data_wire[64],
             fwd_mux_sel_wire[7:0],
             rs1_data_wire,
             rs2_data_wire,
@@ -299,9 +302,7 @@ REG #(.DATA_WIDTH(158)) id_is_reg (
             exec_unit_uop_wire,
             exec_unit_sel_wire,
             if_id_reg_data_wire[31:0]}),
-
-  // Data output
-  .data_out(id_is_reg_data_wire)
+  .data_out(id_is_reg_data_wire)          // Data output
 );
 
 // --------------------------
@@ -342,16 +343,18 @@ MUX_A #(.DATA_WIDTH(32)) imm_mux (
 
 // Branch resolver unit
 BRU #(.DATA_WIDTH(32)) bru0 (
-  .pred_in()
-  .rs1_data_in(is_rs1_data_wire),       // R[rs1] data input
-  .rs2_data_in(is_rs2_data_wire),       // R[rs2] data input
+  .pred_in(id_is_reg_data_wire[151]),       // Branch was predicted?
+  .rs1_data_in(is_rs1_data_wire),           // R[rs1] data input
+  .rs2_data_in(is_rs2_data_wire),           // R[rs2] data input
   .imm_data_in(id_is_reg_data_wire[73:42]), // IMM data input
-  .pc_data_in(id_is_reg_data_wire[31:0]),
-  .sel_in(id_is_reg_data_wire[34:32]),  //
-  .uop_in(id_is_reg_data_wire[38:35]),  // uOP input
-  .flush_out(),
-  .pc_mux_sel_out(ifu_mux_sel_wire),     // IFU mux sel wire
-  .pc_addr_out(pc_upd_addr_wire),
+  .pc_data_in(id_is_reg_data_wire[31:0]),   // PC data input
+  .sel_in(id_is_reg_data_wire[34:32]),      // EXEC UNIT Selection
+  .uop_in(id_is_reg_data_wire[38:35]),      // uOP input
+  .feedback_out(bru_feedback_wire),
+  .taken_out(bru_taken_wire),
+  .flush_out(flush_wire),                   // Flush pipeline
+  .pc_mux_sel_out(ifu_mux_sel_wire),        // IFU mux sel wire
+  .pc_addr_out(pc_upd_addr_wire)
 );
 
 // Issue unit

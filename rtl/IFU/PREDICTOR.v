@@ -17,44 +17,74 @@
 
 module PREDICTOR (
   input clock_in,
+  input reset_in,
+  input taken_branch_in,          // Taken branch feedback
   input feedback_enable_in,
   input [9:0] pc_indx_branch_in,  // Update data for branch
   input [31:0] ins_data_in,       // INS data input
   input [31:0] pc_addr_in,        // PC address input
-  input [31:0] taken_branch_in,   // Taken branch feedback
-
   output taken_pred_out,
-  output pc_branch_sel_out,
   output [31:0] pred_pc_out
 );
 
 // Parameter definition
+parameter MEM_SIZE = 1024;
 parameter BRANCH = 5'b11000;
 
+// Memory definition
+reg [1:0] branch_buffer [0:MEM_SIZE-1];
+
 // Wire definition
-wire pc_branch_sel_wire;
+wire taken_pred_wire;
+wire [1:0] status_wire;
+wire [1:0] old_status_wire;
+wire [31:0] imm_value_wire;
+wire [31:0] target_pc_wire;
+// ------------------------------------
 
 // Combinational logic
 always @ ( * ) begin
   if(ins_data_in[6:2] == BRANCH) begin
-    // Predict if the branch should be taken or not taken
-    pc_branch_sel_wire = 1'b1;
+    // Predict if the branch should be taken or not
+    status_wire = branch_buffer[pc_addr_in[9:0]];
+    taken_pred_wire = (status_wire==2'b00 | status_wire==2'b01) ? 1'b0 : 1'b1;
+
+    // Depending on prediction, PC target value is computed
+    if (taken_pred_wire == 1'b1) begin
+      imm_value_wire = {{ 20{ins_data_in[31]}},     // Generates immediate value
+                          ins_data_in[7],
+                          ins_data_in[30:25],
+                          ins_data_in[11:8], 1'b0};
+      target_pc_wire = imm_value_wire + pc_addr_in; // Computes target PC
+    end else begin
+      target_pc_wire = 32'h00000000;
+    end
+  // Executes if instruction is not a branch
   end else begin
-    // Branch should not be taken => MUX_SEL unset
-    // PC_PRED output same as PC
-    pc_branch_sel_wire = 1'b0;
+    taken_pred_wire = 1'b0;
+    target_pc_wire = 32'h00000000;
   end
 end
 
+// Sequential logic
+always @ ( posedge clock_in, posedge reset_in ) begin
+  // Resets memory if signal is asserted on high
+  if(reset_in == 1'b1) begin
+    integer j;
+    for (j=0; j<MEM_SIZE; j=j+1) begin
+      branch_buffer[j] = 2'b00;
+    end
+  end
 
-always @ ( posedge clock_in ) begin
   // Updates branch history according to feedback
+  if(feedback_enable_in == 1'b1) begin
+    old_status_wire = branch_buffer[pc_indx_branch_in];
+    branch_buffer[pc_indx_branch_in] = {old_status_wire[0], taken_branch_in};
+  end
 end
 
-
-
-assign taken_pred_out = 1'b1;
-assign pred_pc_out = 32'h00000000;
+assign taken_pred_out = taken_pred_wire;
+assign pred_pc_out = target_pc_wire;
 
 
 endmodule
