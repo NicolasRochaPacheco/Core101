@@ -20,40 +20,40 @@ module FORWARDING_UNIT(
   input [4:0] rd1_addr_in,  // RD on IS
   input [4:0] rd2_addr_in,  // RD on EX
   input [4:0] rd3_addr_in,  // RD on WB
-  output [9:0] fwd_mux_sel_out
+  output [11:0] fwd_mux_sel_out
 );
 
 // ========================================================
 //                      WIRE DEFINITION
 // ========================================================
-wire [9:0] fwd_mux_sel_wire;
+wire [11:0] fwd_mux_sel_wire;
 
 // ========================================================
 //                      COMBINATIONAL LOGIC
 // ========================================================
 always@(*) begin
   // Sets every signal on zero
-  fwd_mux_sel_wire = 10'b00000000;
+  fwd_mux_sel_wire = 12'b0000000000;
 
   if(rd1_addr_in != 5'b00000) begin
     if(rs1_addr_in == rd1_addr_in)    // Compares ID-IS
-      fwd_mux_sel_wire[5:3] = 3'b111; // Enables on EX0,
+      fwd_mux_sel_wire[7:4] = 4'b1111; // Enables on EX0,
     if(rs2_addr_in == rd1_addr_in)    // Compares ID-IS
-      fwd_mux_sel_wire[2:0] = 3'b111; // Enables on EX_
+      fwd_mux_sel_wire[3:0] = 4'b1111; // Enables on EX_
   end
 
   if(rd2_addr_in != 5'b00000) begin
     if(rs1_addr_in == rd2_addr_in)  // Compares IS-EX
-      fwd_mux_sel_wire[7] = 1'b1;   // Enables on IS0
+      fwd_mux_sel_wire[9] = 1'b1;   // Enables on IS0
     if(rs2_addr_in == rd2_addr_in)  // Compares IS-EX
-      fwd_mux_sel_wire[6] = 1'b1;   // Enables on IS1
+      fwd_mux_sel_wire[8] = 1'b1;   // Enables on IS1
   end
 
   if(rd3_addr_in != 5'b00000) begin
     if(rs1_addr_in == rd3_addr_in)  // Compares EX-WB
-      fwd_mux_sel_wire[9] = 1'b1;   // Enables on ID0
+      fwd_mux_sel_wire[11] = 1'b1;   // Enables on ID0
     if(rs2_addr_in == rd3_addr_in)  // Compares EX-WB
-      fwd_mux_sel_wire[8] = 1'b1;   // Enables on ID1
+      fwd_mux_sel_wire[10] = 1'b1;   // Enables on ID1
   end
 end
 
