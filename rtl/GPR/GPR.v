@@ -21,7 +21,7 @@ module GPR (
     input clock_in,
     input reset_in,
 
-    // Temp four bit addr mode since only int registers will be used
+    input write_enable_in,
     input [4:0] rs1_addr_in,  // Selects rs1 output data
     input [4:0] rs2_addr_in,  // Selects rs2 output data
     input [4:0] rd_addr_in,   // Drives set signal for rd
@@ -283,8 +283,6 @@ REG x07 (
   // Data output
   .data_out(int_reg_x07_data_wire)
 );
-
-
 
 // OUTPUT MUX RS1
 MUX_F rs1_output_mux (

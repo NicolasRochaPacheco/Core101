@@ -20,18 +20,17 @@ module DECODE_UNIT (
   input [2:0] funct3_in,
   input [6:0] funct7_in,
 
-  // Execution unit selection bus
-  output [2:0] exec_unit_sel_out,
-  output [3:0] exec_unit_uop_out,
-
-  // PC src mux selection signal
-  output pc_mux_sel_out,
-
-  // Immediate mux selection signal
-  output imm_mux_sel_out,
+  output imm_mux_sel_out,     // Immediate mux selection signal
+  output pc_mux_sel_out,      // PC src mux selection signal
+  output rd_write_enable_out, // Enable a write on RD
 
   // Exceptions signals
-  output invalid_ins_exception
+  output invalid_ins_exception,
+
+  // Execution unit selection bus
+  output [2:0] exec_unit_sel_out,
+  output [3:0] exec_unit_uop_out
+
 );
 
 // ==========================
@@ -80,8 +79,7 @@ reg pc_mux_sel_reg;
 reg imm_mux_sel_reg;
 // ====================================
 
-wire [3:0] clock_count_halt_wire;
-wire halt_wire;
+wire rd_write_wire;
 
 
 // ====================================
@@ -190,7 +188,7 @@ always@(*) begin
     AUIPC:    pc_mux_sel_reg = 1'b1;
     JAL:      pc_mux_sel_reg = 1'b1;
     JALR:     pc_mux_sel_reg = 1'b1;
-    BRANCH:   pc_mux_sel_reg = 1'b1;
+    BRANCH:   pc_mux_sel_reg = 1'b0;
     default:  pc_mux_sel_reg = 1'b0; // E.E.
   endcase
 
@@ -204,9 +202,24 @@ always@(*) begin
     JALR:     imm_mux_sel_reg = 1'b1;
     AUIPC:    imm_mux_sel_reg = 1'b1;
     LUI:      imm_mux_sel_reg = 1'b1;
-    BRANCH:   imm_mux_sel_reg = 1'b1;
+    BRANCH:   imm_mux_sel_reg = 1'b0;
     default:  imm_mux_sel_reg = 1'b0; // E.E.
   endcase
+
+  // Will writeback on a register?
+  // opcodes: LOAD, OPV, OPIMM, AUIPC, OP, LUI, JAL, JALR
+  case (opcode_in)
+    LOAD:   rd_write_wire = 1'b1;
+    OPV:    rd_write_wire = 1'b1;
+    OPIMM:  rd_write_wire = 1'b1;
+    AUIPC:  rd_write_wire = 1'b1;
+    OP:     rd_write_wire = 1'b1;
+    LUI:    rd_write_wire = 1'b1;
+    JAL:    rd_write_wire = 1'b1;
+    JALR:   rd_write_wire = 1'b1;
+    default:rd_write_wire = 1'b0;
+  endcase
+
 end
 
 
@@ -219,6 +232,7 @@ assign exec_unit_uop_out = exec_uop_reg;
 
 // PC mux selection output
 assign pc_mux_sel_out = pc_mux_sel_reg;
+assign rd_write_enable_out = rd_write_wire;
 
 // Immediate value selection output
 assign imm_mux_sel_out = imm_mux_sel_reg;
