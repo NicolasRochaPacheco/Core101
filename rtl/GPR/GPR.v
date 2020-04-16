@@ -158,130 +158,281 @@ DECODE_F x_decoder(
 
 // X0 REGISTER
 REG x00 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x00_set_wire),
-
-  // Data input (hard wired to zero)
-  .data_in(32'h00000000),
-
-  // Data output
-  .data_out(int_reg_x00_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x00_set_wire&write_enable_in),  // Set input
+  .data_in(32'h00000000),                         // Data input
+  .data_out(int_reg_x00_data_wire)                // Data output
 );
 
 // X1 REGISTER
 REG x01 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x01_set_wire),
-
-  // Data input
-  .data_in(rd_data_in),
-
-  // Data output
-  .data_out(int_reg_x01_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x01_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x01_data_wire)                // Data output
 );
 
 // X2 REGISTER
 REG x02 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x02_set_wire),
-
-  // Data input
-  .data_in(rd_data_in),
-
-  // Data output
-  .data_out(int_reg_x02_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x02_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x02_data_wire)                // Data output
 );
 
 // X3 REGISTER
 REG x03 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x03_set_wire),
-
-  // Data input
-  .data_in(rd_data_in),
-
-  // Data output
-  .data_out(int_reg_x03_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x03_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x03_data_wire)                // Data output
 );
 
 // X4 REGISTER
 REG x04 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x04_set_wire),
-
-  // Data input
-  .data_in(rd_data_in),
-
-  // Data output
-  .data_out(int_reg_x04_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x04_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x04_data_wire)                // Data output
 );
 
 // X5 REGISTER
 REG x05 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x05_set_wire),
-
-  // Data input
-  .data_in(rd_data_in),
-
-  // Data output
-  .data_out(int_reg_x05_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x05_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x05_data_wire)                // Data output
 );
 
 // X6 REGISTER
 REG x06 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
-
-  // Set signal input
-  .set_in(int_reg_x06_set_wire),
-
-  // Data input
-  .data_in(rd_data_in),
-
-  // Data output
-  .data_out(int_reg_x06_data_wire)
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x06_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x06_data_wire)                // Data output
 );
 
-// X7 REGISTER
-REG x07 (
-  // Clock and reset input
-  .clock_in(clock_in),
-  .reset_in(reset_in),
+// X8 REGISTER
+REG x08 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x08_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x08_data_wire)                // Data output
+);
 
-  // Set signal input
-  .set_in(int_reg_x07_set_wire),
+// X9 REGISTER
+REG x09 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x09_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x09_data_wire)                // Data output
+);
 
-  // Data input
-  .data_in(rd_data_in),
+// X10 REGISTER
+REG x10 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x10_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x10_data_wire)                // Data output
+);
 
-  // Data output
-  .data_out(int_reg_x07_data_wire)
+// X11 REGISTER
+REG x11 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x11_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x11_data_wire)                // Data output
+);
+
+// X12 REGISTER
+REG x12 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x12_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x12_data_wire)                // Data output
+);
+
+// X13 REGISTER
+REG x13 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x13_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x13_data_wire)                // Data output
+);
+
+// X14 REGISTER
+REG x14 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x14_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x14_data_wire)                // Data output
+);
+
+// X15 REGISTER
+REG x15 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x15_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x15_data_wire)                // Data output
+);
+
+// X16 REGISTER
+REG x16 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x16_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x16_data_wire)                // Data output
+);
+
+// X17 REGISTER
+REG x17 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x17_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x17_data_wire)                // Data output
+);
+
+// X18 REGISTER
+REG x18 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x18_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x18_data_wire)                // Data output
+);
+
+// X19 REGISTER
+REG x19 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x19_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x19_data_wire)                // Data output
+);
+
+// X20 REGISTER
+REG x20 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x20_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x20_data_wire)                // Data output
+);
+
+// X21 REGISTER
+REG x21 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x21_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x21_data_wire)                // Data output
+);
+
+// X22 REGISTER
+REG x22 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x22_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x22_data_wire)                // Data output
+);
+
+// X23 REGISTER
+REG x23 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x23_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x23_data_wire)                // Data output
+);
+
+// X24 REGISTER
+REG x24 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x24_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x24_data_wire)                // Data output
+);
+
+// X25 REGISTER
+REG x25 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x25_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x25_data_wire)                // Data output
+);
+
+// X26 REGISTER
+REG x26 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x26_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x26_data_wire)                // Data output
+);
+
+// X27 REGISTER
+REG x27 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x27_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x27_data_wire)                // Data output
+);
+
+// X28 REGISTER
+REG x28 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x28_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x28_data_wire)                // Data output
+);
+
+// X29 REGISTER
+REG x29 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x29_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x29_data_wire)                // Data output
+);
+
+// X30 REGISTER
+REG x30 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x30_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x30_data_wire)                // Data output
+);
+
+// X31 REGISTER
+REG x31 (
+  .clock_in(clock_in),                            // Clock input
+  .reset_in(reset_in),                            // Reset input
+  .set_in(int_reg_x31_set_wire&write_enable_in),  // Set input
+  .data_in(rd_data_in),                           // Data input
+  .data_out(int_reg_x31_data_wire)                // Data output
 );
 
 // OUTPUT MUX RS1
