@@ -18,5 +18,7 @@ echo "Simulando"
 docker exec core101 bash -c "./opt/L0G1C101/Core101/obj_dir/VCore101_top"
 echo "Deleting obj_dir for Core101"
 docker exec core101 bash -c "rm -r /opt/L0G1C101/Core101/obj_dir"
+echo "Copying output file"
+docker cp core101:/output_data.txt ./out/output_data.txt
 echo "Deteniendo contenedor"
 docker stop core101
