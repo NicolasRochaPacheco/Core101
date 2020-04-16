@@ -47,7 +47,7 @@ always @ ( * ) begin
   if(ins_data_in[6:2] == BRANCH) begin
     // Predict if the branch should be taken or not
     status_wire = branch_buffer[pc_addr_in[9:0]];
-    taken_pred_wire = (status_wire==2'b00 | status_wire==2'b01) ? 1'b0 : 1'b1;
+    taken_pred_wire = (status_wire==2'b00) || (status_wire==2'b01) ? 1'b0 : 1'b1;
 
     // Depending on prediction, PC target value is computed
     if (taken_pred_wire == 1'b1) begin
