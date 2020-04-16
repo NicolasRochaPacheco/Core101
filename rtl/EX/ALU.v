@@ -33,17 +33,17 @@ module ALU
 // 4'b0010: OR
 // 4'b0011: AND
 // 4'b0100: XOR
-// 4'b0101:
-// 4'b0110:
-// 4'b0111:
+// 4'b0101: Not implemented
+// 4'b0110: Not implemented
+// 4'b0111: Not implemented
 // 4'b1000: BUFFER RS1
 // 4'b1001: BUFFER RS2
 // 4'b1010: SLT (Set lower Than)
 // 4'b1011: SLTU (Set Lower Than Unsigned)
-// 4'b1100:
+// 4'b1100: Not implemented
 // 4'b1101: SRA (Shift Right Arithmetic)
 // 4'b1110: SRL (Shift Right Logic)
-// 4'b1111: SLL (Shift left logic)
+// 4'b1111: SLL (Shift Left Logic)
 // ==============================================
 
 // WIRE DEFINITION
@@ -56,8 +56,14 @@ always@(*) begin
     4'b0001: alu_result_wire = a_data_in - b_data_in;
     4'b0010: alu_result_wire = a_data_in|b_data_in;
     4'b0011: alu_result_wire = a_data_in&b_data_in;
+    4'b0100: alu_result_wire = a_data_in^b_data_in;
     4'b1000: alu_result_wire = a_data_in;
     4'b1001: alu_result_wire = b_data_in;
+    4'b1010: alu_result_wire = ($signed(a_data_in)<$signed(b_data_in))?32'd1:32'd0;
+    4'b1011: alu_result_wire = (a_data_in<b_data_in)?32'd1:32'd0;
+    4'b1101: alu_result_wire = $signed(a_data_in) >>> b_data_in[4:0];
+    4'b1110: alu_result_wire = a_data_in >> b_data_in[4:0];
+    4'b1111: alu_result_wire = a_data_in << b_data_in[4:0];
     default: alu_result_wire = 32'h00000000;
   endcase
 end
