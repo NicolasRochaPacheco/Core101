@@ -56,17 +56,6 @@ int main(int argc, char **argv){
   date[4] = ltm->tm_min;
   date[5] = 1 + ltm->tm_sec;
 
-  // Sets the filename
-  char date_text[50];
-  std::sprintf( date_text,
-                "Y: %i M: %i D: %i H: %i M: %i S: %i",
-                date[0],
-                date[1],
-                date[2],
-                date[3],
-                date[4],
-                date[5] );
-
   // Creates the file
   //std::ofstream output_file;
   //output_file.open("output_data.txt");
