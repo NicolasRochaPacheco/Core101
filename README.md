@@ -30,34 +30,6 @@ Synthetization of Core101 is done with [Verilator](https://www.veripool.org/proj
 This bash script will copy this repository inside the Docker container, then it will synthetize the core, and run some tests. We are currently thinking of how to allow an user to run his/her own tests within the Docker container.
 
 ### Tests
-We will provide two synthetization tests using Verilator, these tests are intended to check that modules can be synthetized. Of course, installation of prerrequisites should not be a problem since we provide a Docker image with all dependencies and requiered files.
-
-
-
-This will run the testbenches on the docker container and output the result on the console. Just make sure that path to Core101 has a parent directory called L0G1C101.
-
-#### Adder test
-To test a single adder, synthetized by Verilator with a testbench consisting of three additions do:
-
-    $ make adder
-    $./obj_dir/VADDER
-
-The tests should output:
-
-    15
-    -5
-    -15
-
-#### Cascade adder test
-To test a cascade adder, with three inputs, and two adders, do:
-
-    $ make cascade
-    $./obj_dir/VCASCADE
-
-Tests should output:
-
-    $ 30
-    $ -13
-    $ 0
+This section is intended to show how tests can be executed on Core101. Tests' source code comes from [Software101](www.github.com/NicolasRochaPacheco/Software101) repository and are compiled using the RV32I toolchain. There are three test programs intended to validate the execution of arithmetic and logical instructions, conditional jumps, and a mix of them. By April 20th, Core101 is able to execute arithmetic, logic and conditional jumps.
 
 
