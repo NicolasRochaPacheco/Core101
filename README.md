@@ -29,6 +29,8 @@ This bash script will copy this repository inside the Docker container, then it 
 ### Tests
 This section is intended to show how tests can be executed on Core101. Tests' source code comes from [Software101](www.github.com/NicolasRochaPacheco/Software101) repository and are compiled using the RV32I toolchain. There are three test programs intended to validate the execution of arithmetic and logical instructions, conditional jumps, and a mix of them. By April 20th, Core101 is able to execute arithmetic, logic and conditional jumps.
 
+---
+
 ## Microarchitecture
 <p align="justify">Core101 is an in-order RISC-V core, that features a five-stage pipeline that resembles an out-of-order processor microarchitecture. Core101 pipeline consists of an instruction fetch (IF) stage, an instruction decode (ID) stage, an issue stage (IS), an execution/memory access stage (EX/MEM) and a writeback stage (WB). It has three "execution units": an integer execution unit, a vector execution unit and a load/store unit. Core101 will fully support the integer base extension from RISC-V ISA (RV32I) and some instructions from vector extension, that we boldly denoted RV32V*.</p>
 
@@ -38,7 +40,5 @@ This section is intended to show how tests can be executed on Core101. Tests' so
 
 ### ISA Support
 As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the base integer extension (RV32I), and some of the Vector extension instructions. Since this core will be used on an embedded system, we will choose the supported Vector instructions thinking about an embedded system profile. As far as the Vector extension v0.8, a profile for embedded system is proposed, and the Vector instruction subset for this core is intended to use that proposal to include vector operations.
-
----
 
 
