@@ -1,5 +1,5 @@
 # Core101
-This repository is intended to host Core101 central processing unit (CPU). This CPU will be used on an embedded system (SoC101) that is going to be developed once the core is finished. This core will support and RV32IV* from RISC-V ISA. Further details on supported instructions are discused later in this file. This core is expected to be finished by May 2020.
+This repository is intended to host Core101 central processing unit (CPU). This CPU will be used on an embedded system (SoC101) that is going to be developed once the core is finished. This core supports Integer (RV32I) and some Vector (RV32V) instructions from RISC-V ISA. Details on supported instructions are introduced later in this README. Core101 will be mainly used on Soc101, but anyone who finds this core useful is free to use it. The main goal behind developing Core101 is introducing vector operations in an embedded system using RISC-V, but other goals were set for its development. We also wanted Core101 to be as well documented as possible regarding its usage and working principles. Finally, to make Core101 usage as easy as possible, we introduced Docker for running simulations.
 
 ---
 
