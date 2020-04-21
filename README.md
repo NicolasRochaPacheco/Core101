@@ -3,20 +3,15 @@
 
 ---
 
-## Microarchitecture
-<p align="justify">Core101 is an in-order RISC-V core, that features a five-stage pipeline that resembles an out-of-order processor microarchitecture. Core101 pipeline consists of an instruction fetch (IF) stage, an instruction decode (ID) stage, an issue stage (IS), an execution/memory access stage (EX/MEM) and a writeback stage (WB). It has three "execution units": an integer execution unit, a vector execution unit and a load/store unit. Core101 will fully support the integer base extension from RISC-V ISA (RV32I) and some instructions from vector extension, that we boldly denoted RV32V*.</p>
-
-<p align="center">
-	<img width="500px" src="https://github.com/NicolasRochaPacheco/Core101/blob/master/doc/resources/uA.png">
-</p>
-
-### ISA Support
-As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the base integer extension (RV32I), and some of the Vector extension instructions. Since this core will be used on an embedded system, we will choose the supported Vector instructions thinking about an embedded system profile. As far as the Vector extension v0.8, a profile for embedded system is proposed, and the Vector instruction subset for this core is intended to use that proposal to include vector operations.
-
----
-
 ## Using Core101
-This part describes how to use Core101. We provide instructions to allow virtually every user to use this Core. In the following subsections you will find a guide on how to clone the repository, how to setup the Docker container and understand why we use it, and how to run tests.
+<p align="justify">This part describes how to use Core101. You will find a guide in how to clone the repository, how to setup the docker container, and how to run programs. For testing purposes we use a program that outputs the numbers from the Fibonacci sequence.</p>
+
+### Cloning Core101
+<p align="justify">To clone Core101 in your computer run the following commands in the console:</p>
+
+	$ git clone https://github.com/NicolasRochaPacheco/Core101.git
+
+<p align="justify">We encourage you to clone Core101 in a folder named L0G1C101 on your home directory. We are working to override this restriction but in the mean time there is no alternative.</p>
 
 ### Docker
 Core101 is intended to be synthetized within a Docker container, in order to keep all dependencies and prerrequisites in an isolated virtual environment. Nevertheless, if you have the requiered software installed on your machine there is no reason for Core101 coming up with errors, unless it is a matter of source code, in which case we apologize beforehand.
@@ -33,5 +28,17 @@ This bash script will copy this repository inside the Docker container, then it 
 
 ### Tests
 This section is intended to show how tests can be executed on Core101. Tests' source code comes from [Software101](www.github.com/NicolasRochaPacheco/Software101) repository and are compiled using the RV32I toolchain. There are three test programs intended to validate the execution of arithmetic and logical instructions, conditional jumps, and a mix of them. By April 20th, Core101 is able to execute arithmetic, logic and conditional jumps.
+
+## Microarchitecture
+<p align="justify">Core101 is an in-order RISC-V core, that features a five-stage pipeline that resembles an out-of-order processor microarchitecture. Core101 pipeline consists of an instruction fetch (IF) stage, an instruction decode (ID) stage, an issue stage (IS), an execution/memory access stage (EX/MEM) and a writeback stage (WB). It has three "execution units": an integer execution unit, a vector execution unit and a load/store unit. Core101 will fully support the integer base extension from RISC-V ISA (RV32I) and some instructions from vector extension, that we boldly denoted RV32V*.</p>
+
+<p align="center">
+	<img width="500px" src="https://github.com/NicolasRochaPacheco/Core101/blob/master/doc/resources/uA.png">
+</p>
+
+### ISA Support
+As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the base integer extension (RV32I), and some of the Vector extension instructions. Since this core will be used on an embedded system, we will choose the supported Vector instructions thinking about an embedded system profile. As far as the Vector extension v0.8, a profile for embedded system is proposed, and the Vector instruction subset for this core is intended to use that proposal to include vector operations.
+
+---
 
 
