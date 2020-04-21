@@ -203,15 +203,15 @@ IFU ifu0(
 );
 
 PREDICTOR pred0 (
-  .clock_in(clock_in),                        // Clock input
-  .reset_in(reset_in),                        // Reset input signal
-  .feedback_enable_in(bru_feedback_wire),     // From BRU (IS/EX)
-  .pc_indx_branch_in(is_ex_reg_data_wire[9:0]),  // From BRU (IS/EX)
-  .ins_data_in(ir_data_wire),                 // IR data input
-  .pc_addr_in(pc_addr_wire),                  // PC addr input
-  .taken_branch_in(bru_taken_wire),           // From BRU (IS/EX)
-  .taken_pred_out(pc_pred_mux_sel_wire),      // To IF/ID
-  .pred_pc_out(pc_pred_addr_wire)             // To IFU
+  .clock_in(clock_in),                          // Clock input
+  .reset_in(reset_in),                          // Reset input signal
+  .feedback_enable_in(bru_feedback_wire),       // From BRU (IS/EX)
+  .pc_indx_branch_in(is_ex_reg_data_wire[9:0]), // From BRU (IS/EX)
+  .ins_data_in(ir_data_wire),                   // IR data input
+  .pc_addr_in(pc_addr_wire),                    // PC addr input
+  .taken_branch_in(bru_taken_wire),             // From BRU (IS/EX)
+  .taken_pred_out(pc_pred_mux_sel_wire),        // To IF/ID
+  .pred_pc_out(pc_pred_addr_wire)               // To IFU
 );
 
 // Instruction fetch/instruction decode (IF/ID) pipeline register
