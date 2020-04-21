@@ -1,33 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include <ctime>
+
 #include "verilated.h"
 #include "VCore101_top.h"
 
 // This will be stored on a simulation file
-void print_sim_status(int data[21]){
-  std::printf("CC%03i, ", data[0]);  // Clock cycle value
-  std::printf("%08X, ", data[1]); // PC on IF/ID
-  std::printf("%08X, ", data[2]); // PC on ID/IS
-  std::printf("%08X, ", data[3]); // PC on IS/EX
-  std::printf("%08X, ", data[4]); // PC on EX/WB
-  std::printf("%02i, ", data[5]); // RD addr on IF/ID
-  std::printf("%02i, ", data[6]);
-  std::printf("%02i, ", data[7]);
-  std::printf("%02i, ", data[8]);
-  std::printf("%05i, ", data[9]);   // IMM value
-  std::printf("%05i, ", data[10]);
-  std::printf("%05i, ", data[11]);
-  std::printf("%05i, ", data[12]);
-  std::printf("%05i, ", data[13]);
-  std::printf("%05i, ", data[14]);
-  std::printf("%05i, ", data[15]);
-  std::printf("%01i, ", data[16]);
-  std::printf("%05i, ", data[17]); // Data to be written on RD
-  std::printf("%01i, ", data[18]);
-  std::printf("%01i, ", data[19]);
-  std::printf("%01i, ", data[20]);
-  std::cout << std::endl;
+void print_sim_status(int data[19], FILE* output){ //std::ofstream& output){
+
+  //output << "For CC" << data[0] << std::endl;
+  //output << "    PC on IF/ID: " << data[1] << std::endl;
+
+  std::fprintf(output, "For CC%03i: \n", data[0]);
+  std::fprintf(output, "    PC on IF/ID: %08X \n", data[1]);
+  std::fprintf( output,
+                "    RD: %02i; E: %01i; Data: %08i \n",
+                data[2], data[4], data[3]);
+  std::fprintf(output, "    INT uOP: %02i; Enable \n", data[5]);
+  std::fprintf(output, "    LSU uOP: %02i \n", data[6]);
+  std::fprintf(output, "    VEC uOP: %02i \n", data[7]);
+  std::fprintf(output, "    BRU uOP: %02i; Enable: %i \n", data[8], data[11]);
+  std::fprintf(output, "    Branch taken: %i \n", data[12]);
+  std::fprintf(output, "    BRU A: %08i B: %08i \n", data[13], data[14]);
+  std::fprintf(output, "======================================\n");
 }
 
 
@@ -40,13 +37,44 @@ int main(int argc, char **argv){
   VCore101_top* core = new VCore101_top;
 
   // Clock signal parameters
-  const int N_CLOCKS = 32;
+  const int N_CLOCKS = 64;
   const int RESOLUTION = 2;
 
   int clock_arr[N_CLOCKS*RESOLUTION];
   int cc_val;
 
   int halt;
+
+  // Retrieves the current time
+  time_t now = time(0);
+  tm *ltm = localtime(&now);
+  int date[6];
+  date[0] = 1900 + ltm->tm_year;
+  date[1] = ltm->tm_mon+1;
+  date[2] = ltm->tm_mday;
+  date[3] = ltm->tm_hour;
+  date[4] = ltm->tm_min;
+  date[5] = 1 + ltm->tm_sec;
+
+  // Sets the filename
+  char date_text[50];
+  std::sprintf( date_text,
+                "Y: %i M: %i D: %i H: %i M: %i S: %i",
+                date[0],
+                date[1],
+                date[2],
+                date[3],
+                date[4],
+                date[5] );
+
+  // Creates the file
+  //std::ofstream output_file;
+  //output_file.open("output_data.txt");
+  //output_file << date_text << std::endl;
+
+  FILE *output_file;
+  output_file = fopen("output_data.txt", "w");
+
 
   // Creates the clock array
   for(int i=0; i<N_CLOCKS*RESOLUTION; ++i){
@@ -56,9 +84,6 @@ int main(int argc, char **argv){
       clock_arr[i] = 0;
     }
   }
-
-  // Prints headers
-  std::cout << "CC, PC_IF, PC_IS" << "\n";
 
   // Main simulation cicle
   for (int k=0; k < N_CLOCKS*RESOLUTION; ++k){
@@ -94,34 +119,30 @@ int main(int argc, char **argv){
     core->eval();
 
     // An array to store outputs from the core as the simulation runs.
-    int data[21];
+    int data[19];
 
-    data[0] = cc_val; // Clock cycle value.
+    data[0] = cc_val;                         // Clock cycle value.
     data[1] = (int) core->pc_data_if_id_out;  // PC value on IF/ID
-    data[2] = (int) core->pc_data_id_is_out;  // PC value on ID/IS
-    data[3] = (int) core->pc_data_is_ex_out;  // PC value on IS/EX
-    data[4] = (int) core->pc_data_ex_wb_out;  // PC value on EX/WB
-    data[5] = (int) core->rd_addr_if_id_out;
-    data[6] = (int) core->rd_addr_id_is_out;
-    data[7] = (int) core->rd_addr_is_ex_out;
-    data[8] = (int) core->rd_addr_ex_wb_out;
-    data[9] = (int) core->imm_data_out;
-    data[10] = (int) core->id_rs1_data_out;
-    data[11] = (int) core->id_rs2_data_out;
-    data[12] = (int) core->is_a_src_data_out;
-    data[13] = (int) core->is_b_src_data_out;
-    data[14] = (int) core->int_ex_a_src_data_out;
-    data[15] = (int) core->int_ex_b_src_data_out;
-    data[16] = (int) core->int_uop_out;
-    data[17] = (int) core->wb_data_out;
-    data[18] = (int) core->ifu_mux_sel_out;
-    data[19] = (int) core->ifu_ctrl_data_out;
-    data[20] = (int) core->exec_unit_sel_out;
-
+    data[2] = (int) core->rd_addr_ex_wb_out;  // RD on WB stage
+    data[3] = (int) core->wb_data_out;        // Data to be written on RD
+    data[4] = (int) core->rd_write_enable_out;// Enable signal for RD
+    data[5] = (int) core->int_uop_out;        // INT uOP on EX
+    data[6] = (int) core->lsu_uop_out;        // LSU uOP on EX
+    data[7] = (int) core->vec_uop_out;        // VEC uOP on EX
+    data[8] = (int) core->bru_uop_out;        // BRU uOP on EX
+    data[11] = (int) core->bru_enable_out;    // BRU enable out
+    data[12] = (int) core->branch_taken_out;  // Branch taken out
+    data[13] = (int) core->bru_a_src_out;     // BRU A data
+    data[14] = (int) core->bru_b_src_out;     // BRU B data
 
     // Prints simulation status on screen
-    print_sim_status(data);
+    if(clock_arr[k] == 1){
+      print_sim_status(data, output_file);
+    }
   }
+
+  //output_file.close();
+  fclose(output_file);
 
   // Exits
   exit(EXIT_SUCCESS);
