@@ -15,12 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module FORWARDING_UNIT(
-  input [4:0] rs1_addr_in,  // RS1 on ID
-  input [4:0] rs2_addr_in,  // RS2 on ID
-  input [4:0] rd1_addr_in,  // RD on IS
-  input [4:0] rd2_addr_in,  // RD on EX
-  input [4:0] rd3_addr_in,  // RD on WB
-  output [11:0] fwd_mux_sel_out
+  input [4:0] fwd_if_rb_addr_in,  // RS1 on ID
+  input [4:0] fwd_if_ra_addr_in,  // RS2 on ID
+  input [4:0] fwd_id_rd_addr_in,  // RD on IS
+  output [11:0] fwd_mux_sel_out   // FWD MUX values
 );
 
 // ========================================================
