@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module IMM_GEN (
-  input [4:0] opcode_in,
-  input [24:0] instruction_in,
-  output [31:0] immediate_out
+  input [4:0] imm_gen_opcode_in,
+  input [24:0] imm_gen_ins_in,
+  output [31:0] imm_gen_data_out
 );
 
 // PARAMETER DEFINITION
@@ -42,11 +42,31 @@ wire [31:0] imm_wire;
 // COMBINATIONAL LOGIC
 // ========================================================
 always @ (*) begin
-  case(opcode_in)
-    LOAD:   imm_wire = {{21{instruction_in[24]}}, instruction_in[23:13]};
-    OPIMM:  imm_wire = {{21{instruction_in[24]}}, instruction_in[23:13]};
-    AUIPC:  imm_wire = {instruction_in[24:5], {12{1'b0}}};
-    BRANCH: imm_wire = {{20{instruction_in[24]}}, instruction_in[0], instruction_in[23:18], instruction_in[4:1], 1'b0};
+  case(imm_gen_opcode_in)
+    LOAD:   imm_wire = {{21{imm_gen_ins_in[24]}},
+                        imm_gen_ins_in[23:13]};
+    OPIMM:  imm_wire = {{21{imm_gen_ins_in[24]}},
+                        imm_gen_ins_in[23:13]};
+    AUIPC:  imm_wire = {imm_gen_ins_in[24:5],
+                        {12{1'b0}}};
+    STORE:  imm_wire = {{21{imm_gen_ins_in[24]}},
+                        imm_gen_ins_in[23:18],
+                        imm_gen_ins_in[4:0]};
+    OP:     imm_wire = 32'h00000000;
+    LUI:    imm_wire = {imm_gen_ins_in[24:5],
+                        {12{1'b0}}};
+    BRANCH: imm_wire = {{20{imm_gen_ins_in[24]}},
+                        imm_gen_ins_in[0],
+                        imm_gen_ins_in[23:18],
+                        imm_gen_ins_in[4:1],
+                        1'b0};
+    JALR:   imm_wire = {{21{imm_gen_ins_in[24]}},
+                        imm_gen_ins_in[23:13]};
+    JAL:    imm_wire = {{12{imm_gen_ins_in[24]}},
+                        imm_gen_ins_in[12:5],
+                        imm_gen_ins_in[13],
+                        imm_gen_ins_in[23:14],
+                        1'b0};
     default: imm_wire = 32'h00000000;
   endcase
 end
@@ -54,6 +74,6 @@ end
 // ========================================================
 // OUTPUT LOGIC
 // ========================================================
-assign immediate_out = imm_wire;
+assign imm_gen_data_out = imm_wire;
 
 endmodule
