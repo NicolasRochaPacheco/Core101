@@ -35,7 +35,7 @@ This section is intended to show how tests can be executed on Core101. Tests' so
 <p align="justify">Core101 is an in-order RISC-V core, that features a five-stage pipeline that resembles an out-of-order processor microarchitecture. Core101 pipeline consists of an instruction fetch (IF) stage, an instruction decode (ID) stage, an issue stage (IS), an execution/memory access stage (EX/MEM) and a writeback stage (WB). It has three "execution units": an integer execution unit, a vector execution unit and a load/store unit. Core101 will fully support the integer base extension from RISC-V ISA (RV32I) and some instructions from vector extension, that we boldly denoted RV32V*.</p>
 
 <p align="center">
-	<img width="500px" src="https://github.com/NicolasRochaPacheco/Core101/blob/master/doc/resources/uA.png">
+	<img width="500px" src="https://github.com/NicolasRochaPacheco/Core101/blob/master/doc/resources/files/uA_general.png">
 </p>
 
 ### ISA Support
