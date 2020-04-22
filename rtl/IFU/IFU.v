@@ -19,94 +19,76 @@
 //  MODULE DEFINITION
 //-----------------------------------------------
 module IFU (
-	input ifu_clock_in, 				// Clock signal input
-	input ifu_reset_in,					// Reset signal input
-	input pc_set_in,						// PC set input
-	input ir_set_in,						// IR set input
-	input pc_mux_sel_in,				// PC mux selection signal input
-	input pc_branch_sel_in,			// PC branch MUX selection signal
-	input [31:0] pc_branch_in,	// PC branch input data
-  input [31:0] pc_addr_in,		// PC data input for jumps
-  input [31:0] ir_data_in,		// Instruction register data inputs
-  output [31:0] pc_addr_out,	// Program counter data output
-  output [31:0] ir_data_out 	// Instruction register data output
+	input ifu_clock_in, 						// Clock signal input
+	input ifu_reset_in,							// Reset signal input
+	input ifu_pc_set_in,						// PC set input
+	input ifu_ir_set_in,						// IR set input
+	input ifu_jump_sel_in,					// PC branch MUX selection signal
+	input ifu_branch_sel_in,				// PC mux selection signal input
+	input [31:0] ifu_jump_in,				// PC data input for jumps
+	input [31:0] ifu_branch_in,			// PC branch input data
+  input [31:0] ifu_ir_data_in,		// Instruction register data inputs
+  output [31:0] ifu_pc_addr_out,	// Program counter data output
+  output [31:0] ifu_ir_data_out 	// Instruction register data output
 );
 
 //-----------------------------------------------
 //  WIRE DEFINITION
 //-----------------------------------------------
-wire [31:0] pc_inc_wire; //
-wire [31:0] pc_branch_mux_wire;
-wire [31:0] pc_src_wire; //
-wire [31:0] pc_addr_wire; //
+wire [31:0] pc_inc_wire; 				//
+wire [31:0] pc_jump_addr_wire;	//
+wire [31:0] pc_src_wire; 				//
+wire [31:0] pc_addr_wire; 			// Stored PC value
 wire [31:0] ir_data_wire;
 
 //-----------------------------------------------
 //  MODULES INSTANTIATION
 //-----------------------------------------------
+// Adder increment for PC
 ADDER #(.DATA_WIDTH(32)) inc_adder (
-	// Data inputs
-	.a_operand_in(32'h00000004),
-	.b_operand_in(pc_addr_wire),
-
-	// Data outputs
-	.add_result_out(pc_inc_wire)
+	.a_operand_in(32'h00000004),				// +4
+	.b_operand_in(pc_addr_wire),				// Current PC value
+	.add_result_out(pc_inc_wire)				// Data outputs
 );
 
-MUX_A #(.DATA_WIDTH(32)) pc_src_mux (
-	// Data inputs
-	.a_data_src_in(pc_inc_wire),
-	.b_data_src_in(pc_addr_in),
-
-	// Control inputs
-	.data_sel_in(pc_mux_sel_in),
-
-	// Data outputs
-	.data_out(pc_branch_mux_wire)
+// 2-to-1 multiplexer
+MUX_A #(.DATA_WIDTH(32)) jump_mux (
+	.a_data_src_in(pc_inc_wire),				// PC inc data
+	.b_data_src_in(ifu_jump_in),		// Jump address input
+	.data_sel_in(ifu_jump_sel_in),	// Jump signal SEL
+	.data_out(pc_jump_addr_wire)				// Selection between jump and inc
 );
 
+// 2-to-1 multiplexer
 MUX_A #(.DATA_WIDTH(32)) branch_sel_mux (
-	.a_data_src_in(pc_branch_mux_wire),
-	.b_data_src_in(pc_branch_in),
-	.data_sel_in(pc_branch_sel_in),
-	.data_out(pc_src_wire)
+	.a_data_src_in(pc_jump_addr_wire),	// Selection between jump and INC
+	.b_data_src_in(ifu_branch_in),			// Branch address input
+	.data_sel_in(ifu_branch_sel_in),		// Branch sel signal
+	.data_out(pc_src_wire)							// Selection between jump, inc and branch
 );
 
+// PC register
 REG #(.DATA_WIDTH(32)) pc (
-	// Clock and reset inputs
-	.clock_in(ifu_clock_in),
-	.reset_in(ifu_reset_in),
-
-	// Data inputs
-	.data_in(pc_src_wire),
-	.set_in(pc_set_in),
-
-	// Data outputs
-	.data_out(pc_addr_wire)
+	.clock_in(ifu_clock_in),						// Clock input for PC register
+	.reset_in(ifu_reset_in),						// Reset input for PC register
+	.data_in(pc_src_wire),							// Data input for PC register
+	.set_in(ifu_pc_set_in),							// Set signal for PC register
+	.data_out(pc_addr_wire)							// Data output for PC register
 );
 
+// IR register
 REG_NEG #(.DATA_WIDTH(32)) ir (
-	// Clock and reset inputs
 	.clock_in(ifu_clock_in),
 	.reset_in(ifu_reset_in),
-
-	// Data inputs
-	.data_in(ir_data_in),
-
-	// Control inputs
-	.set_in(ir_set_in),
-
-	// Data outputs
+	.data_in(ifu_ir_data_in),
+	.set_in(ifu_ir_set_in),
 	.data_out(ir_data_wire)
 );
-
 
 //-----------------------------------------------
 // OUTPUT LOGIC
 //-----------------------------------------------
-assign pc_addr_out = pc_addr_wire;
-assign ir_data_out = ir_data_wire;
-
-
+assign ifu_pc_addr_out = pc_addr_wire;
+assign ifu_ir_data_out = ir_data_wire;
 
 endmodule // IFU
