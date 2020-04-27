@@ -7,6 +7,7 @@ CUR_DIR = $(shell pwd)
 
 # Verilog source files
 VPATH = $(CUR_DIR)/rtl/Core101_top.v \
+				$(CUR_DIR)/rtl/Core101.v \
 				$(CUR_DIR)/rtl/IFU/IFU.v \
 				$(CUR_DIR)/rtl/IFU/PREDICTOR.v \
 				$(CUR_DIR)/rtl/GPR/GPR.v \
@@ -20,7 +21,6 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/EX/ALU.v \
 				$(CUR_DIR)/rtl/MISC/ADDER.v \
 				$(CUR_DIR)/rtl/MISC/MUX_A.v \
-				$(CUR_DIR)/rtl/MISC/MUX_B.v \
 				$(CUR_DIR)/rtl/MISC/MUX_F.v \
 				$(CUR_DIR)/rtl/MISC/DECODE_F.v \
 				$(CUR_DIR)/rtl/MISC/REG.v \
