@@ -3,9 +3,21 @@ module Core101 (
   input reset_in,
 
   input [31:0] ins_mem_data_in,
+  output [31:0] ins_mem_addr_out,
 
-  output [31:0] ins_mem_addr_out
-
+  output [4:0] rd_addr_ex_wb_out,
+  output [31:0] imm_data_out,
+  output [31:0] pc_data_if_id_out,
+  wb_data_out
+  rd_write_enable_out
+  int_uop_out
+  lsu_uop_out
+  vec_uop_out
+  bru_uop_out
+  bru_enable_out
+  branch_taken_out
+  bru_a_src_out
+  bru_b_src_out
 );
 
 //---------------------------
@@ -15,8 +27,8 @@ module Core101 (
 // Pipeline registers
 wire [64:0] if_id_reg_data_wire;
 wire [93:0] id_is_reg_data_wire;
-wire [160:0] is_ex_reg_data_wire;
-
+wire [159:0] is_ex_reg_data_wire;
+wire [70:0] ex_wb_reg_data_wire;
 
 // IFU
 wire jump_mux_sel_wire;
@@ -67,6 +79,19 @@ wire [31:0] b_data_wire;
 // BRU
 wire flush_wire;
 
+//
+wire [31:0] int_exec_result_wire;
+
+
+// EX output multiplexer
+wire [31:0] ex_result_wire;
+
+
+// PC INC on WB
+wire [31:0] wb_pc_inc_wire;
+
+// Output MUX
+wire [31:0] writeback_wire;
 
 //---------------------------
 // FETCH STAGE
@@ -174,13 +199,13 @@ REG #(.DATA_WIDTH(94)) id_is_reg (
 GPR gpr0 (
   .clock_in(clock_in),
   .reset_in(reset_in),
-  .write_enable_in(),
+  .write_enable_in(ex_wb_reg_data_wire[69]),
   .rs1_addr_in(id_is_reg_data_wire[73:69]),
-  .rs2_addr_in(id_is_reg_data_wire[77:74]),
-  .rd_addr_in(),
+  .rs2_addr_in(id_is_reg_data_wire[78:74]),
+  .rd_addr_in(ex_wb_reg_data_wire[68:64]),
   .rs1_data_out(rs1_data_wire),
   .rs2_data_out(rs2_data_wire),
-  .rd_data_in()
+  .rd_data_in(writeback_wire)
 );
 
 // Issue unit
@@ -202,16 +227,16 @@ REG #(.DATA_WIDTH(160)) is_ex_reg (
   .clock_in(clock_in),                        // Clock input
   .reset_in(reset_in),                        // Reset input
   .set_in(1'b1),                              // Set signal input
-  .data_in({  id_is_reg_data_wire[92],        // PREDICTION?
-              id_is_reg_data_wire[91],        // PC INC?
-              id_is_reg_data_wire[90],        // RD write enable
-              id_is_reg_data_wire[89],        // RS2 or IMM [156]
-              id_is_reg_data_wire[88],        // RS1 or PC [155]
+  .data_in({  id_is_reg_data_wire[93],        // PREDICTION?
+              id_is_reg_data_wire[92],        // PC INC?
+              id_is_reg_data_wire[91],        // RD write enable
+              id_is_reg_data_wire[90],        // RS2 or IMM [156]
+              id_is_reg_data_wire[89],        // RS1 or PC [155]
               int_enable_wire,                // INT enable wire [154]
               lsu_enable_wire,                // LSU enable wire [153]
               vec_enable_wire,                // VEC enable wire [152]
               bru_enable_wire,                // BRU enable wire [151]
-              id_is_reg_data_wire[87:86],     // FWD MUX selection [150:149]
+              id_is_reg_data_wire[88:87],     // FWD MUX selection [150:149]
               int_uop_wire,                   // INT uOP data [148:145]
               lsu_uop_wire,                   // LSU UOP data [144:141]
               vec_uop_wire,                   // VEC uOP data [140:137]
@@ -232,7 +257,7 @@ REG #(.DATA_WIDTH(160)) is_ex_reg (
 MUX_A #(.DATA_WIDTH(32)) mux_fwd_a (
   .data_sel_in(is_ex_reg_data_wire[149]),
   .a_data_src_in(is_ex_reg_data_wire[95:64]),
-  .b_data_src_in(),
+  .b_data_src_in(writeback_wire),
   .data_out(fwd_mux_a_data_wire)
 );
 
@@ -240,7 +265,7 @@ MUX_A #(.DATA_WIDTH(32)) mux_fwd_a (
 MUX_A #(.DATA_WIDTH(32)) mux_fwd_b (
   .data_sel_in(is_ex_reg_data_wire[150]),
   .a_data_src_in(is_ex_reg_data_wire[127:96]),
-  .b_data_src_in(),
+  .b_data_src_in(writeback_wire),
   .data_out(fwd_mux_b_data_wire)
 );
 
@@ -261,17 +286,17 @@ MUX_A imm_mux (
 );
 
 INT_EXEC int_exec0 (
-  .a_data_in(),
-  .b_data_in(),
-  .enable_in(),
-  .uop_in(),
-  .res_data_out()
+  .a_data_in(a_data_wire),
+  .b_data_in(b_data_wire),
+  .enable_in(is_ex_reg_data_wire[154]),
+  .uop_in(is_ex_reg_data_wire[148:145]),
+  .res_data_out(int_exec_result_wire)
 );
 
 BRU bru_exec0 (
-  .pred_in(),                      // Prediction input
-  .enable_in(),                    // Enable input
-  .uop_in(),                 // uOP input
+  .pred_in(is_ex_reg_data_wire[159]),     // Prediction input
+  .enable_in(is_ex_reg_data_wire[151]),   // Enable input
+  .uop_in(is_ex_reg_data_wire[136:133]),  // uOP input
   .pc_in(),       // Program counter address
   .rs1_in(),      // R[rs1] data input
   .rs2_in(),      // R[rs2] data input
@@ -283,11 +308,59 @@ BRU bru_exec0 (
   .target_out()  // PC new address output
 );
 
+MUX_B ex_out_mux0 (
+  .data_sel_in(2'b00),
+  .a_data_src_in(int_exec_result_wire),
+  .b_data_src_in(),
+  .c_data_src_in(),
+  .d_data_src_in(),
+  .data_out(ex_result_wire)
+);
+
+// IS/EX pipeline register
+REG #(.DATA_WIDTH(71)) ex_wb_reg (
+  .clock_in(clock_in),                        // Clock input
+  .reset_in(reset_in),                        // Reset input
+  .set_in(1'b1),                              // Set signal input
+  .data_in({  is_ex_reg_data_wire[158],       // EX or PC INC?
+              is_ex_reg_data_wire[157],       // Write enable for RD
+              is_ex_reg_data_wire[132:128],   // RD address
+              ex_result_wire,                 // EX result wire
+              is_ex_reg_data_wire[31:0]}),    // PC value [31:0]
+  .data_out(ex_wb_reg_data_wire)
+);
 
 // ---------------------------------
 // WRITEBACK STAGE
 // ---------------------------------
 
+ADDER wb_pc_inc0 (
+  .a_operand_in(ex_wb_reg_data_wire),
+  .b_operand_in(32'h00000004),
+  .add_result_out(wb_pc_inc_wire)
+);
+
+MUX_A ex_mux (
+  .data_sel_in(ex_wb_reg_data_wire),
+  .a_data_src_in(ex_wb_reg_data_wire),
+  .b_data_src_in(wb_pc_inc_wire),
+  .data_out(writeback_wire)
+);
+
+
+assign pc_data_if_id_out = if_id_reg_data_wire[31:0];
+assign rd_addr_ex_wb_out = ex_wb_reg_data_wire[68:64];
+assign imm_data_out = id_is_reg_data_wire[63:32];
+assign wb_data_out = writeback_wire;
+assign rd_write_enable_out = ex_wb_reg_data_wire[69];
+assign int_uop_out = ;
+assign lsu_uop_out = ;
+assign vec_uop_out = ;
+assign bru_uop_out = ;
+assign bru_enable_out = ;
+assign branch_taken_out = ;
+assign bru_a_src_out = ;
+assign bru_b_src_out = ;
 
 
 endmodule
