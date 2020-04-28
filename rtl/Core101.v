@@ -5,19 +5,26 @@ module Core101 (
   input [31:0] ins_mem_data_in,
   output [31:0] ins_mem_addr_out,
 
-  output [4:0] rd_addr_ex_wb_out,
-  output [31:0] imm_data_out,
+  // Debug from IF/ID
+  output if_id_prediction_out,
   output [31:0] pc_data_if_id_out,
-  wb_data_out
-  rd_write_enable_out
-  int_uop_out
-  lsu_uop_out
-  vec_uop_out
-  bru_uop_out
-  bru_enable_out
-  branch_taken_out
-  bru_a_src_out
-  bru_b_src_out
+  output [31:0] ir_data_if_id_out,
+
+  // Debug from ID/IS
+  output [1:0] id_is_fwd_out,
+  output [31:0] imm_data_out,
+
+  output bru_enable_out,
+  output branch_taken_out,
+  output rd_write_enable_out,
+  output [3:0] int_uop_out,
+  output [3:0] lsu_uop_out,
+  output [3:0] vec_uop_out,
+  output [3:0] bru_uop_out,
+  output [4:0] rd_addr_ex_wb_out,
+  output [31:0] wb_data_out,
+  output [31:0] bru_a_src_out,
+  output [31:0] bru_b_src_out
 );
 
 //---------------------------
@@ -157,8 +164,8 @@ DECODE_UNIT decode0 (
 
 // Forwarding unit
 FORWARDING_UNIT fwd_unit0 (
-  .fwd_if_rb_addr_in(if_id_reg_data_wire[51:47]), // RS1 from ID
-  .fwd_if_ra_addr_in(if_id_reg_data_wire[56:52]), // RS2 from ID
+  .fwd_if_ra_addr_in(if_id_reg_data_wire[51:47]), // RS1 from ID
+  .fwd_if_rb_addr_in(if_id_reg_data_wire[56:52]), // RS2 from ID
   .fwd_id_rd_addr_in(id_is_reg_data_wire[68:64]), // RD from IS
   .fwd_mux_sel_out(fwd_mux_sel_wire)              // MUX signals output
 );
@@ -210,8 +217,8 @@ GPR gpr0 (
 
 // Issue unit
 ISSUE_UNIT issue0 (
-  .exec_unit_sel_in(),  //
-  .exec_uop_in(),       //
+  .exec_unit_sel_in(id_is_reg_data_wire[86:83]),  //
+  .exec_uop_in(id_is_reg_data_wire[82:79]),       //
   .int_enable_out(int_enable_wire),
   .vec_enable_out(vec_enable_wire),
   .lsu_enable_out(lsu_enable_wire),
@@ -301,7 +308,7 @@ BRU bru_exec0 (
   .rs1_in(),      // R[rs1] data input
   .rs2_in(),      // R[rs2] data input
   .imm_in(),      // Immediate value.
-  .flush_out(),                   // Flush signal output
+  .flush_out(flush_wire),                   // Flush signal output
   .taken_out(),                   // Signal indicating if a branch was taken
   .enable_out(),                  // Enable signal for predictor
   .mux_out(),                     // PC mux selection output
@@ -324,8 +331,8 @@ REG #(.DATA_WIDTH(71)) ex_wb_reg (
   .set_in(1'b1),                              // Set signal input
   .data_in({  is_ex_reg_data_wire[158],       // EX or PC INC?
               is_ex_reg_data_wire[157],       // Write enable for RD
-              is_ex_reg_data_wire[132:128],   // RD address
-              ex_result_wire,                 // EX result wire
+              is_ex_reg_data_wire[132:128],   // RD address [68:64]
+              ex_result_wire,                 // EX result wire [63:32]
               is_ex_reg_data_wire[31:0]}),    // PC value [31:0]
   .data_out(ex_wb_reg_data_wire)
 );
@@ -335,32 +342,41 @@ REG #(.DATA_WIDTH(71)) ex_wb_reg (
 // ---------------------------------
 
 ADDER wb_pc_inc0 (
-  .a_operand_in(ex_wb_reg_data_wire),
+  .a_operand_in(ex_wb_reg_data_wire[31:0]),
   .b_operand_in(32'h00000004),
   .add_result_out(wb_pc_inc_wire)
 );
 
 MUX_A ex_mux (
-  .data_sel_in(ex_wb_reg_data_wire),
-  .a_data_src_in(ex_wb_reg_data_wire),
+  .data_sel_in(ex_wb_reg_data_wire[70]),
+  .a_data_src_in(ex_wb_reg_data_wire[63:32]),
   .b_data_src_in(wb_pc_inc_wire),
   .data_out(writeback_wire)
 );
 
+// Memory interface output
+assign ins_mem_addr_out = pc_addr_wire;
 
+// Debug for IF stage
+assign if_id_prediction_out = if_id_reg_data_wire[64];
 assign pc_data_if_id_out = if_id_reg_data_wire[31:0];
-assign rd_addr_ex_wb_out = ex_wb_reg_data_wire[68:64];
+assign ir_data_if_id_out = if_id_reg_data_wire[63:32];
+
+assign id_is_fwd_out = id_is_reg_data_wire[88:87];
 assign imm_data_out = id_is_reg_data_wire[63:32];
+
+
+assign rd_addr_ex_wb_out = ex_wb_reg_data_wire[68:64];
 assign wb_data_out = writeback_wire;
 assign rd_write_enable_out = ex_wb_reg_data_wire[69];
-assign int_uop_out = ;
-assign lsu_uop_out = ;
-assign vec_uop_out = ;
-assign bru_uop_out = ;
-assign bru_enable_out = ;
-assign branch_taken_out = ;
-assign bru_a_src_out = ;
-assign bru_b_src_out = ;
+assign int_uop_out = is_ex_reg_data_wire[148:145];
+assign lsu_uop_out = is_ex_reg_data_wire[144:141];
+assign vec_uop_out = is_ex_reg_data_wire[140:137];
+assign bru_uop_out = is_ex_reg_data_wire[136:133];
+assign bru_enable_out = is_ex_reg_data_wire[151];
+assign branch_taken_out = 1'b0;
+assign bru_a_src_out = fwd_mux_a_data_wire;//a_data_wire;
+assign bru_b_src_out = fwd_mux_b_data_wire;//b_data_wire;
 
 
 endmodule
