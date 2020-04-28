@@ -21,6 +21,7 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/EX/ALU.v \
 				$(CUR_DIR)/rtl/MISC/ADDER.v \
 				$(CUR_DIR)/rtl/MISC/MUX_A.v \
+				$(CUR_DIR)/rtl/MISC/MUX_B.v \
 				$(CUR_DIR)/rtl/MISC/MUX_F.v \
 				$(CUR_DIR)/rtl/MISC/DECODE_F.v \
 				$(CUR_DIR)/rtl/MISC/REG.v \
