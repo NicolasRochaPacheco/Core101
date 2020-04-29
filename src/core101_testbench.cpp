@@ -41,19 +41,6 @@ int main(int argc, char **argv){
   int clock_arr[N_CLOCKS*RESOLUTION];
   int cc_val;
 
-  int halt;
-
-  // Retrieves the current time
-  time_t now = time(0);
-  tm *ltm = localtime(&now);
-  int date[6];
-  date[0] = 1900 + ltm->tm_year;
-  date[1] = ltm->tm_mon+1;
-  date[2] = ltm->tm_mday;
-  date[3] = ltm->tm_hour;
-  date[4] = ltm->tm_min;
-  date[5] = 1 + ltm->tm_sec;
-
   // Output file
   FILE *output_file;
   output_file = fopen("output_data.txt", "w");
