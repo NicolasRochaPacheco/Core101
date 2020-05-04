@@ -1,3 +1,19 @@
+// Core101 module definition
+// Copyright (C) 2019 Nicolas Rocha Pacheco
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 module Core101 (
   input clock_in,
   input reset_in,
@@ -7,13 +23,15 @@ module Core101 (
 
   // Debug from IF/ID
   output if_id_prediction_out,
-  output [31:0] pc_data_if_id_out,
   output [31:0] ir_data_if_id_out,
+  output [31:0] pc_data_if_id_out,
 
   // Debug from ID/IS
   output [1:0] id_is_fwd_out,
-  output [31:0] imm_data_out,
+  output [31:0] imm_id_is_data_out,
+  output [31:0] pc_id_is_data_out,
 
+  // Debug from IS/EX
   output bru_enable_out,
   output branch_taken_out,
   output rd_write_enable_out,
@@ -23,8 +41,8 @@ module Core101 (
   output [3:0] bru_uop_out,
   output [4:0] rd_addr_ex_wb_out,
   output [31:0] wb_data_out,
-  output [31:0] bru_a_src_out,
-  output [31:0] bru_b_src_out
+  output [31:0] ex_a_data_out,
+  output [31:0] ex_b_data_out
 );
 
 //---------------------------
@@ -85,6 +103,10 @@ wire [31:0] b_data_wire;
 
 // BRU
 wire flush_wire;
+wire taken_wire;
+wire branch_enable_wire;
+wire bru_ifu_mux_sel_wire;
+wire [31:0] bru_target_address_wire;
 
 //
 wire [31:0] int_exec_result_wire;
@@ -106,26 +128,26 @@ wire [31:0] writeback_wire;
 
 // Instruction fetch unit module
 IFU ifu0(
-  .ifu_clock_in(clock_in),              // Clock input
-  .ifu_reset_in(reset_in),              // Reset input
-  .ifu_pc_set_in(1'b1),                 // PC set input
-  .ifu_ir_set_in(1'b1),                 // IR set input
-  .ifu_jump_sel_in(),                   // IFU MUX sel for new PC
-  .ifu_branch_sel_in(pred_taken_wire),  // IFU MUX sel for branches
-  .ifu_branch_in(pred_target_wire),     // IFU branch target input
-  .ifu_jump_in(),                       // New PC address input
-  .ifu_ir_data_in(ins_mem_data_in),     // IR data input
-  .ifu_pc_addr_out(pc_addr_wire),       // PC data output
-  .ifu_ir_data_out(ir_data_wire)        // IR data input
+  .ifu_clock_in(clock_in),                // Clock input.
+  .ifu_reset_in(reset_in),                // Reset input.
+  .ifu_pc_set_in(1'b1),                   // PC set input.
+  .ifu_ir_set_in(1'b1),                   // IR set input.
+  .ifu_jump_sel_in(bru_ifu_mux_sel_wire), // Jump MUX sel.
+  .ifu_jump_in(bru_target_address_wire),  // Jump PC address input.
+  .ifu_branch_sel_in(pred_taken_wire),    // Prediction MUX sel.
+  .ifu_branch_in(pred_target_wire),       // Prediction PC target input.
+  .ifu_ir_data_in(ins_mem_data_in),       // IR data input
+  .ifu_pc_addr_out(pc_addr_wire),         // PC data output
+  .ifu_ir_data_out(ir_data_wire)          // IR data input
 );
 
 // Branch predictor and return address buffer
 PREDICTOR pred0 (
-  .pred_clock_in(clock_in),             // Clock input
-  .pred_reset_in(reset_in),             // Reset input
-  .pred_write_enable_in(),              // From BRU (EX)
-  .pred_taken_in(),                     // From BRU (EX)
-  .pred_indx_in(),                      // From BRU (IS/EX)
+  .pred_clock_in(clock_in),                   // Clock input
+  .pred_reset_in(reset_in),                   // Reset input
+  .pred_write_enable_in(branch_enable_wire),  // From BRU (EX)
+  .pred_taken_in(taken_wire),           // From BRU (EX)
+  .pred_indx_in(is_ex_reg_data_wire[9:0]),  // From BRU (IS/EX)
   .pred_ins_in(ir_data_wire),           // IR data input
   .pred_addr_in(pc_addr_wire),          // PC addr input
   .pred_taken_out(pred_taken_wire),     // To IFU and IF/ID
@@ -304,15 +326,15 @@ BRU bru_exec0 (
   .pred_in(is_ex_reg_data_wire[159]),     // Prediction input
   .enable_in(is_ex_reg_data_wire[151]),   // Enable input
   .uop_in(is_ex_reg_data_wire[136:133]),  // uOP input
-  .pc_in(),       // Program counter address
-  .rs1_in(),      // R[rs1] data input
-  .rs2_in(),      // R[rs2] data input
-  .imm_in(),      // Immediate value.
-  .flush_out(flush_wire),                   // Flush signal output
-  .taken_out(),                   // Signal indicating if a branch was taken
-  .enable_out(),                  // Enable signal for predictor
-  .mux_out(),                     // PC mux selection output
-  .target_out()  // PC new address output
+  .pc_in(is_ex_reg_data_wire[31:0]),      // Program counter address
+  .rs1_in(a_data_wire),                   // R[rs1] data input
+  .rs2_in(b_data_wire),                   // R[rs2] data input
+  .imm_in(is_ex_reg_data_wire[63:32]),    // Immediate value.
+  .flush_out(flush_wire),                 // Flush signal output
+  .taken_out(taken_wire),                 // Signal indicating if a branch was taken
+  .enable_out(branch_enable_wire),        // Enable signal for predictor
+  .mux_out(bru_ifu_mux_sel_wire),         // PC mux selection output
+  .target_out(bru_target_address_wire)    // PC new address output
 );
 
 MUX_B ex_out_mux0 (
@@ -362,21 +384,23 @@ assign if_id_prediction_out = if_id_reg_data_wire[64];
 assign pc_data_if_id_out = if_id_reg_data_wire[31:0];
 assign ir_data_if_id_out = if_id_reg_data_wire[63:32];
 
+// Debug for ID stage
 assign id_is_fwd_out = id_is_reg_data_wire[88:87];
-assign imm_data_out = id_is_reg_data_wire[63:32];
+assign imm_id_is_data_out = id_is_reg_data_wire[63:32];
+assign pc_id_is_data_out = id_is_reg_data_wire[31:0];
 
-
-assign rd_addr_ex_wb_out = ex_wb_reg_data_wire[68:64];
-assign wb_data_out = writeback_wire;
-assign rd_write_enable_out = ex_wb_reg_data_wire[69];
 assign int_uop_out = is_ex_reg_data_wire[148:145];
 assign lsu_uop_out = is_ex_reg_data_wire[144:141];
 assign vec_uop_out = is_ex_reg_data_wire[140:137];
 assign bru_uop_out = is_ex_reg_data_wire[136:133];
 assign bru_enable_out = is_ex_reg_data_wire[151];
 assign branch_taken_out = 1'b0;
-assign bru_a_src_out = fwd_mux_a_data_wire;//a_data_wire;
-assign bru_b_src_out = fwd_mux_b_data_wire;//b_data_wire;
+assign ex_a_data_out = a_data_wire;
+assign ex_b_data_out = b_data_wire;
 
+// Debug for EX/WB pipeline register
+assign rd_write_enable_out = ex_wb_reg_data_wire[69];
+assign rd_addr_ex_wb_out = ex_wb_reg_data_wire[68:64];
+assign wb_data_out = writeback_wire;
 
 endmodule
