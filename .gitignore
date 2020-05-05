@@ -1,3 +1,4 @@
 out
 obj_dir
 rtl/MEM/*.hex
+doc/resources/source/*.drawio
