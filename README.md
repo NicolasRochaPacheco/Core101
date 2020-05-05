@@ -43,12 +43,17 @@ As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the b
 
 #### Supported Instructions as of May 5th
 
-| INS   | STATUS             | INS  | STATUS             | 
-| ---   | ---                | ---  | ---                |
-| LUI   |                    | BNE  | :heavy_check_mark: |
-| AUIPC | :heavy_check_mark: | BLT  | :heavy_check_mark: |
-| JAL   | :heavy_check_mark: | BGE  | :heavy_check_mark: |
-| JALR  | :heavy_check_mark: | BLTU | :heavy_check_mark: |
-| BEQ   | :heavy_check_mark: | BGEU | :heavy_check_mark: |
+| INS   | STATUS             | INS  | STATUS             | INS   | STATUS             | INS    | STATUS             |
+| ---   | ---                | ---  | ---                | ---   | ---                | ---    | ---                |
+| LUI   |                    | LB   |                    | SLTIU | :heavy_check_mark: | SLT    | :heavy_check_mark: |
+| AUIPC | :heavy_check_mark: | LH   |                    | XORI  | :heavy_check_mark: | SLTU   | :heavy_check_mark: |
+| JAL   | :heavy_check_mark: | LW   |                    | ORI   | :heavy_check_mark: | XOR    | :heavy_check_mark: |
+| JALR  | :heavy_check_mark: | LBU  |                    | ANDI  | :heavy_check_mark: | SRL    | :heavy_check_mark: |
+| BEQ   | :heavy_check_mark: | LHU  |                    | SLLI  | :heavy_check_mark: | SRA    | :heavy_check_mark: |
+| BNE   | :heavy_check_mark: | SB   |                    | SRLI  | :heavy_check_mark: | OR     | :heavy_check_mark: |
+| BLT   | :heavy_check_mark: | SH   |                    | SRAI  | :heavy_check_mark: | AND    | :heavy_check_mark: |
+| BGE   | :heavy_check_mark: | SW   |                    | ADD   | :heavy_check_mark: | FENCE  |                    |
+| BLTU  | :heavy_check_mark: | ADDI | :heavy_check_mark: | SUB   | :heavy_check_mark: | ECALL  |                    |
+| BGEU  | :heavy_check_mark: | SLTI | :heavy_check_mark: | SLL   | :heavy_check_mark: | EBREAK |                    |
 
 
