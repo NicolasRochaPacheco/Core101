@@ -41,4 +41,9 @@ This section is intended to show how tests can be executed on Core101. Tests' so
 ### ISA Support
 As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the base integer extension (RV32I), and some of the Vector extension instructions. Since this core will be used on an embedded system, we will choose the supported Vector instructions thinking about an embedded system profile. As far as the Vector extension v0.8, a profile for embedded system is proposed, and the Vector instruction subset for this core is intended to use that proposal to include vector operations.
 
+#### Supported Instructions as of May 5th
+
+| ADD | :heavy_check_mark: |
+| :-: | :-: |
+
 
