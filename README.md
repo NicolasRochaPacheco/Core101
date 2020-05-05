@@ -44,6 +44,7 @@ As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the b
 #### Supported Instructions as of May 5th
 
 | LUI   |                    | BNE  | :heavy_check_mark: |
+| ---   | ---                | ---  | ---                |
 | AUIPC | :heavy_check_mark: | BLT  | :heavy_check_mark: |
 | JAL   | :heavy_check_mark: | BGE  | :heavy_check_mark: |
 | JALR  | :heavy_check_mark: | BLTU | :heavy_check_mark: |
