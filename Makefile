@@ -25,7 +25,8 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 				$(CUR_DIR)/rtl/MISC/MUX_F.v \
 				$(CUR_DIR)/rtl/MISC/DECODE_F.v \
 				$(CUR_DIR)/rtl/MISC/REG.v \
-				$(CUR_DIR)/rtl/MISC/REG_NEG.v
+				$(CUR_DIR)/rtl/MISC/REG_NEG.v \
+				$(CUR_DIR)/rtl/CONTROL/CONTROL.v
 
 CPATH = $(CUR_DIR)/src/core101_testbench.cpp
 
