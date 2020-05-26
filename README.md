@@ -45,14 +45,14 @@ As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the b
 
 | INS   | STATUS             | INS  | STATUS             | INS   | STATUS             | INS    | STATUS             |
 | ---   | ---                | ---  | ---                | ---   | ---                | ---    | ---                |
-| LUI   |                    | LB   |                    | SLTIU | :heavy_check_mark: | SLT    | :heavy_check_mark: |
-| AUIPC | :heavy_check_mark: | LH   |                    | XORI  | :heavy_check_mark: | SLTU   | :heavy_check_mark: |
-| JAL   | :heavy_check_mark: | LW   |                    | ORI   | :heavy_check_mark: | XOR    | :heavy_check_mark: |
-| JALR  | :heavy_check_mark: | LBU  |                    | ANDI  | :heavy_check_mark: | SRL    | :heavy_check_mark: |
-| BEQ   | :heavy_check_mark: | LHU  |                    | SLLI  | :heavy_check_mark: | SRA    | :heavy_check_mark: |
-| BNE   | :heavy_check_mark: | SB   |                    | SRLI  | :heavy_check_mark: | OR     | :heavy_check_mark: |
-| BLT   | :heavy_check_mark: | SH   |                    | SRAI  | :heavy_check_mark: | AND    | :heavy_check_mark: |
-| BGE   | :heavy_check_mark: | SW   |                    | ADD   | :heavy_check_mark: | FENCE  |                    |
+| LUI   |                    | LB   | :heavy_check_mark: | SLTIU | :heavy_check_mark: | SLT    | :heavy_check_mark: |
+| AUIPC | :heavy_check_mark: | LH   | :heavy_check_mark: | XORI  | :heavy_check_mark: | SLTU   | :heavy_check_mark: |
+| JAL   | :heavy_check_mark: | LW   | :heavy_check_mark: | ORI   | :heavy_check_mark: | XOR    | :heavy_check_mark: |
+| JALR  | :heavy_check_mark: | LBU  | :heavy_check_mark: | ANDI  | :heavy_check_mark: | SRL    | :heavy_check_mark: |
+| BEQ   | :heavy_check_mark: | LHU  | :heavy_check_mark: | SLLI  | :heavy_check_mark: | SRA    | :heavy_check_mark: |
+| BNE   | :heavy_check_mark: | SB   | :heavy_check_mark: | SRLI  | :heavy_check_mark: | OR     | :heavy_check_mark: |
+| BLT   | :heavy_check_mark: | SH   | :heavy_check_mark: | SRAI  | :heavy_check_mark: | AND    | :heavy_check_mark: |
+| BGE   | :heavy_check_mark: | SW   | :heavy_check_mark: | ADD   | :heavy_check_mark: | FENCE  |                    |
 | BLTU  | :heavy_check_mark: | ADDI | :heavy_check_mark: | SUB   | :heavy_check_mark: | ECALL  |                    |
 | BGEU  | :heavy_check_mark: | SLTI | :heavy_check_mark: | SLL   | :heavy_check_mark: | EBREAK |                    |
 
