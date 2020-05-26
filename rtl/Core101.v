@@ -35,6 +35,7 @@ module Core101 (
   output bru_enable_out,
   output branch_taken_out,
   output rd_write_enable_out,
+  output jump_mux_sel_out,
   output [3:0] int_uop_out,
   output [3:0] lsu_uop_out,
   output [3:0] vec_uop_out,
@@ -42,7 +43,9 @@ module Core101 (
   output [4:0] rd_addr_ex_wb_out,
   output [31:0] wb_data_out,
   output [31:0] ex_a_data_out,
-  output [31:0] ex_b_data_out
+  output [31:0] ex_b_data_out,
+
+  output [31:0] jump_target_wb_out
 );
 
 //---------------------------
@@ -51,9 +54,9 @@ module Core101 (
 
 // Pipeline registers
 wire [64:0] if_id_reg_data_wire;
-wire [93:0] id_is_reg_data_wire;
-wire [159:0] is_ex_reg_data_wire;
-wire [70:0] ex_wb_reg_data_wire;
+wire [94:0] id_is_reg_data_wire;
+wire [160:0] is_ex_reg_data_wire;
+wire [71:0] ex_wb_reg_data_wire;
 
 // IFU
 wire jump_mux_sel_wire;
@@ -72,6 +75,7 @@ wire pc_mux_sel_wire;
 wire imm_mux_sel_wire;
 wire rd_write_enable_wire;
 wire rd_mux_sel_wire;
+wire dec_jump_sel_wire;
 wire [3:0] exec_unit_uop_wire;
 wire [3:0] exec_unit_sel_wire;
 
@@ -102,25 +106,29 @@ wire [31:0] a_data_wire;
 wire [31:0] b_data_wire;
 
 // BRU
-wire flush_wire;
+wire bru_flush_wire;
 wire taken_wire;
 wire branch_enable_wire;
 wire bru_ifu_mux_sel_wire;
 wire [31:0] bru_target_address_wire;
 
-//
+// Integer execution unit
 wire [31:0] int_exec_result_wire;
 
-
-// EX output multiplexer
+// EX output MUX
 wire [31:0] ex_result_wire;
-
 
 // PC INC on WB
 wire [31:0] wb_pc_inc_wire;
 
 // Output MUX
 wire [31:0] writeback_wire;
+
+// Jump MUX
+wire [31:0] jump_mux_pc_wire;
+
+// Control unit
+wire [3:0] pipeline_reset_wire;
 
 //---------------------------
 // FETCH STAGE
@@ -132,8 +140,8 @@ IFU ifu0(
   .ifu_reset_in(reset_in),                // Reset input.
   .ifu_pc_set_in(1'b1),                   // PC set input.
   .ifu_ir_set_in(1'b1),                   // IR set input.
-  .ifu_jump_sel_in(bru_ifu_mux_sel_wire), // Jump MUX sel.
-  .ifu_jump_in(bru_target_address_wire),  // Jump PC address input.
+  .ifu_jump_sel_in(bru_ifu_mux_sel_wire|ex_wb_reg_data_wire[71]), // Jump MUX sel.
+  .ifu_jump_in(jump_mux_pc_wire),  // Jump PC address input.
   .ifu_branch_sel_in(pred_taken_wire),    // Prediction MUX sel.
   .ifu_branch_in(pred_target_wire),       // Prediction PC target input.
   .ifu_ir_data_in(ins_mem_data_in),       // IR data input
@@ -157,7 +165,7 @@ PREDICTOR pred0 (
 // Instruction fetch/instruction decode (IF/ID) pipeline register
 REG #(.DATA_WIDTH(65)) if_id_reg (
   .clock_in(clock_in),                  // Clock input
-  .reset_in(reset_in|flush_wire),       // Reset signal or flush signal
+  .reset_in(pipeline_reset_wire[3]),       // Reset signal or flush signal
   .set_in(1'b1),                        // Set signal
   .data_in( { pred_taken_wire,          // Prediction signal
               ir_data_wire,             // IR data
@@ -179,6 +187,7 @@ DECODE_UNIT decode0 (
   .dec_imm_mux_sel_out(imm_mux_sel_wire),         // IMM SEL signal output
   .dec_rd_write_enable_out(rd_write_enable_wire), // Write enable signal output
   .dec_rd_data_sel_out(rd_mux_sel_wire),
+  .dec_jump_sel_out(dec_jump_sel_wire),            //
   .dec_invalid_ins_exception(),
   .dec_exec_unit_uop_out(exec_unit_uop_wire),     // EXEC uOP output
   .dec_exec_unit_sel_out(exec_unit_sel_wire)      // EXEC SEL output
@@ -200,11 +209,12 @@ IMM_GEN imm_gen0 (
 );
 
 // Instruction decode/instruction issue (ID/IS) pipeline register
-REG #(.DATA_WIDTH(94)) id_is_reg (
+REG #(.DATA_WIDTH(95)) id_is_reg (
   .clock_in(clock_in),                            // Clock input
-  .reset_in(reset_in|flush_wire),                 // Reset or flush signal
+  .reset_in(pipeline_reset_wire[2]),              // Reset or flush signal
   .set_in(1'b1),
-  .data_in({  if_id_reg_data_wire[64],            // Prediction bit [93]
+  .data_in({  if_id_reg_data_wire[64],            // Prediction bit [94]
+              dec_jump_sel_wire,                  // Jump MUX sel wire [93]
               rd_mux_sel_wire,                    // RD data or PC INC [92]
               rd_write_enable_wire,               // RD write enable [91]
               imm_mux_sel_wire,                   // IMM or RS2 [90]
@@ -252,13 +262,14 @@ ISSUE_UNIT issue0 (
 );
 
 // IS/EX pipeline register
-REG #(.DATA_WIDTH(160)) is_ex_reg (
+REG #(.DATA_WIDTH(161)) is_ex_reg (
   .clock_in(clock_in),                        // Clock input
-  .reset_in(reset_in),                        // Reset input
+  .reset_in(pipeline_reset_wire[1]),                        // Reset input
   .set_in(1'b1),                              // Set signal input
-  .data_in({  id_is_reg_data_wire[93],        // PREDICTION?
-              id_is_reg_data_wire[92],        // PC INC?
-              id_is_reg_data_wire[91],        // RD write enable
+  .data_in({  id_is_reg_data_wire[94],        // PREDICTION? [160]
+              id_is_reg_data_wire[93],        // Jump MUX selection [159]
+              id_is_reg_data_wire[92],        // PC INC? [158]
+              id_is_reg_data_wire[91],        // RD write enable [157]
               id_is_reg_data_wire[90],        // RS2 or IMM [156]
               id_is_reg_data_wire[89],        // RS1 or PC [155]
               int_enable_wire,                // INT enable wire [154]
@@ -323,15 +334,15 @@ INT_EXEC int_exec0 (
 );
 
 BRU bru_exec0 (
-  .pred_in(is_ex_reg_data_wire[159]),     // Prediction input
+  .pred_in(is_ex_reg_data_wire[160]),     // Prediction input
   .enable_in(is_ex_reg_data_wire[151]),   // Enable input
   .uop_in(is_ex_reg_data_wire[136:133]),  // uOP input
   .pc_in(is_ex_reg_data_wire[31:0]),      // Program counter address
   .rs1_in(a_data_wire),                   // R[rs1] data input
   .rs2_in(b_data_wire),                   // R[rs2] data input
   .imm_in(is_ex_reg_data_wire[63:32]),    // Immediate value.
-  .flush_out(flush_wire),                 // Flush signal output
-  .taken_out(taken_wire),                 // Signal indicating if a branch was taken
+  .flush_out(bru_flush_wire),                 // Flush signal output
+  .taken_out(taken_wire),                 // High if a branch was taken
   .enable_out(branch_enable_wire),        // Enable signal for predictor
   .mux_out(bru_ifu_mux_sel_wire),         // PC mux selection output
   .target_out(bru_target_address_wire)    // PC new address output
@@ -347,12 +358,13 @@ MUX_B ex_out_mux0 (
 );
 
 // IS/EX pipeline register
-REG #(.DATA_WIDTH(71)) ex_wb_reg (
+REG #(.DATA_WIDTH(72)) ex_wb_reg (
   .clock_in(clock_in),                        // Clock input
-  .reset_in(reset_in),                        // Reset input
+  .reset_in(pipeline_reset_wire[0]),                        // Reset input
   .set_in(1'b1),                              // Set signal input
-  .data_in({  is_ex_reg_data_wire[158],       // EX or PC INC?
-              is_ex_reg_data_wire[157],       // Write enable for RD
+  .data_in({  is_ex_reg_data_wire[159],       // Jump MUX sel signal [71]
+              is_ex_reg_data_wire[158],       // EX or PC INC? [70]
+              is_ex_reg_data_wire[157],       // Write enable for RD [69]
               is_ex_reg_data_wire[132:128],   // RD address [68:64]
               ex_result_wire,                 // EX result wire [63:32]
               is_ex_reg_data_wire[31:0]}),    // PC value [31:0]
@@ -369,11 +381,28 @@ ADDER wb_pc_inc0 (
   .add_result_out(wb_pc_inc_wire)
 );
 
+MUX_A jump_mux (
+  .data_sel_in(ex_wb_reg_data_wire[71]),
+  .a_data_src_in(bru_target_address_wire),
+  .b_data_src_in(ex_wb_reg_data_wire[63:32]),
+  .data_out(jump_mux_pc_wire)
+);
+
 MUX_A ex_mux (
   .data_sel_in(ex_wb_reg_data_wire[70]),
   .a_data_src_in(ex_wb_reg_data_wire[63:32]),
   .b_data_src_in(wb_pc_inc_wire),
   .data_out(writeback_wire)
+);
+
+// ---------------------------------
+// CONTROL UNIT
+// ---------------------------------
+CONTROL control0 (
+  .reset_in(reset_in),
+  .bru_flush_in(bru_flush_wire),
+  .jump_flush_in(ex_wb_reg_data_wire[71]),
+  .pipeline_reset_out(pipeline_reset_wire)
 );
 
 // Memory interface output
@@ -398,9 +427,13 @@ assign branch_taken_out = 1'b0;
 assign ex_a_data_out = a_data_wire;
 assign ex_b_data_out = b_data_wire;
 
+// Debug for IS/EX pipeline
+
 // Debug for EX/WB pipeline register
+assign jump_mux_sel_out = ex_wb_reg_data_wire[71];
 assign rd_write_enable_out = ex_wb_reg_data_wire[69];
 assign rd_addr_ex_wb_out = ex_wb_reg_data_wire[68:64];
 assign wb_data_out = writeback_wire;
+assign jump_target_wb_out = jump_mux_pc_wire;
 
 endmodule
