@@ -25,8 +25,8 @@ module Core101_top (
 
   // ID/IS debug signals
   output [1:0] id_is_fwd_out,
-  output [31:0] imm_id_is_data_out,
-  output [31:0] pc_id_is_data_out,
+  output [31:0] imm_data_id_is_out,
+  output [31:0] pc_data_id_is_out,
 
   // IS/EX debug signals
   output bru_enable_out,
@@ -40,7 +40,10 @@ module Core101_top (
 
   output [31:0] wb_data_out,
   output [31:0] ex_a_data_out,
-  output [31:0] ex_b_data_out
+  output [31:0] ex_b_data_out,
+
+  output jump_mux_sel_out,
+  output [31:0] jump_target_wb_out
 );
 
 // Dummy memory definition
@@ -61,7 +64,9 @@ wire write_enable_wire;
 wire [3:0] int_uop_wire;
 wire [4:0] rd_addr_ex_wb_wire;
 
+wire jump_mux_sel_wire;
 wire [31:0] wb_data_wire;
+wire [31:0] jump_target_wb_wire;
 
 wire [31:0] ex_a_data_wire;
 wire [31:0] ex_b_data_wire;
@@ -93,7 +98,10 @@ Core101 core101 (
   .bru_enable_out(),
   .branch_taken_out(),
   .ex_a_data_out(ex_a_data_wire),
-  .ex_b_data_out(ex_b_data_wire)
+  .ex_b_data_out(ex_b_data_wire),
+
+  .jump_mux_sel_out(jump_mux_sel_wire),
+  .jump_target_wb_out(jump_target_wb_wire)
 );
 
 //
@@ -105,13 +113,13 @@ MAIN_MEMORY mem (
 
 // IF/ID
 assign if_id_prediction_out = if_id_prediction_wire;
-assign pc_data_if_id_out = pc_data_if_id_wire;
 assign ir_data_if_id_out = ir_data_if_id_wire;
+assign pc_data_if_id_out = pc_data_if_id_wire;
 
 // ID/IS
 assign id_is_fwd_out = id_is_fwd_wire;
-assign imm_id_is_data_out = imm_data_wire;
-assign pc_id_is_data_out = pc_id_is_data_wire;
+assign imm_data_id_is_out = imm_data_wire;
+assign pc_data_id_is_out = pc_id_is_data_wire;
 
 // IS/EX
 assign int_uop_out = int_uop_wire;
@@ -119,9 +127,11 @@ assign ex_a_data_out = ex_a_data_wire;
 assign ex_b_data_out = ex_b_data_wire;
 
 // EX/WB
-assign rd_addr_ex_wb_out = rd_addr_ex_wb_wire;
+assign jump_mux_sel_out = jump_mux_sel_wire;
 assign wb_data_out = wb_data_wire;
+assign rd_addr_ex_wb_out = rd_addr_ex_wb_wire;
 assign rd_write_enable_out = write_enable_wire;
+assign jump_target_wb_out = jump_target_wb_wire;
 
 
 endmodule // Core101_top
