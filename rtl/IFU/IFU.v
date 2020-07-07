@@ -23,10 +23,10 @@ module IFU (
 	input ifu_reset_in,							// Reset signal input
 	input ifu_pc_set_in,						// PC set input
 	input ifu_ir_set_in,						// IR set input
-	input ifu_jump_sel_in,					// PC branch MUX selection signal
-	input ifu_branch_sel_in,				// PC mux selection signal input
-	input [31:0] ifu_jump_in,				// PC data input for jumps
-	input [31:0] ifu_branch_in,			// PC branch input data
+	input ifu_jump_sel_in,					// PC jump selection
+	input ifu_branch_sel_in,				// PC branch prediction selection
+	input [31:0] ifu_jump_in,				// PC jump value
+	input [31:0] ifu_branch_in,			// PC branch prediction value
   input [31:0] ifu_ir_data_in,		// Instruction register data inputs
   output [31:0] ifu_pc_addr_out,	// Program counter data output
   output [31:0] ifu_ir_data_out 	// Instruction register data output
