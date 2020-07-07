@@ -60,7 +60,7 @@ always @ ( * ) begin
 
   // Prediction if taken or not
   case(pred_ins_in[6:2])
-    BRANCH:   taken_pred_wire = ~branch_buffer[pred_addr_in[9:0]][1];
+    BRANCH:   taken_pred_wire = branch_buffer[pred_addr_in[9:0]][1];
     JAL:      taken_pred_wire = 1'b1;
     default:  taken_pred_wire = 1'b0;
   endcase
@@ -84,7 +84,7 @@ always @ ( posedge pred_clock_in, posedge pred_reset_in ) begin
   end
 
   // Updates branch history according to feedback
-  if(feedback_enable_in == 1'b1) begin
+  if(pred_write_enable_in == 1'b1) begin
     old_status_wire = branch_buffer[pred_indx_in];
     branch_buffer[pred_indx_in] = {old_status_wire[0], pred_taken_in};
   end
