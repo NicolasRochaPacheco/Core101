@@ -43,19 +43,20 @@ wire [31:0] pc_target_wire;  //
 // COMBINATIONAL LOGIC
 always @ (*) begin
   if (enable_in==1'b1) begin        // If a branch is being executed
+
     feedback_wire = 1'b1;           // Sets feedback enable
 
     case(uop_in)  // Resolves the branch
       4'b0000: taken_wire = (rs1_in == rs2_in) ? 1'b1:1'b0; // BEQ
-      4'b0001: taken_wire = (rs1_in != rs2_in) ? 1'b1:1'b0;
-      4'b0010: taken_wire = (rs1_in <  rs2_in) ? 1'b1:1'b0;  // BLT
-      4'b0011: taken_wire = (rs1_in >= rs2_in) ? 1'b1:1'b0; //
+      4'b0001: taken_wire = (rs1_in != rs2_in) ? 1'b1:1'b0; // BNE
+      4'b0010: taken_wire = (rs1_in <  rs2_in) ? 1'b1:1'b0; // BLT
+      4'b0011: taken_wire = (rs1_in >= rs2_in) ? 1'b1:1'b0; // BGE
       4'b0110: taken_wire = 1'b0; //(rs1_data_in<rs2_data_in) ? 1'b1:1'b0;  // BLTU
       4'b0111: taken_wire = (rs1_in >  rs2_in) ? 1'b1:1'b0;
       default: taken_wire = 1'b0;
     endcase
 
-    if(pred_in==taken_wire) begin   // If the prediction was correct
+    if(pred_in == taken_wire) begin   // If the prediction was correct
       flush_wire = 1'b0;            // Flush not needed
       pc_mux_sel_wire = 1'b0;       // PC update not needed
     end else begin                  // If the prediction was not correct
