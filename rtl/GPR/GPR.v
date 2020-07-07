@@ -157,7 +157,7 @@ DECODE_F x_decoder(
 
 
 // X0 REGISTER
-REG x00 (
+REG_NEG x00 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x00_set_wire&write_enable_in),  // Set input
@@ -166,7 +166,7 @@ REG x00 (
 );
 
 // X1 REGISTER
-REG x01 (
+REG_NEG x01 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x01_set_wire&write_enable_in),  // Set input
@@ -175,7 +175,7 @@ REG x01 (
 );
 
 // X2 REGISTER
-REG x02 (
+REG_NEG x02 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x02_set_wire&write_enable_in),  // Set input
@@ -184,7 +184,7 @@ REG x02 (
 );
 
 // X3 REGISTER
-REG x03 (
+REG_NEG x03 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x03_set_wire&write_enable_in),  // Set input
@@ -193,7 +193,7 @@ REG x03 (
 );
 
 // X4 REGISTER
-REG x04 (
+REG_NEG x04 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x04_set_wire&write_enable_in),  // Set input
@@ -202,7 +202,7 @@ REG x04 (
 );
 
 // X5 REGISTER
-REG x05 (
+REG_NEG x05 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x05_set_wire&write_enable_in),  // Set input
@@ -211,7 +211,7 @@ REG x05 (
 );
 
 // X6 REGISTER
-REG x06 (
+REG_NEG x06 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x06_set_wire&write_enable_in),  // Set input
@@ -220,7 +220,7 @@ REG x06 (
 );
 
 // X8 REGISTER
-REG x08 (
+REG_NEG x08 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x08_set_wire&write_enable_in),  // Set input
@@ -229,7 +229,7 @@ REG x08 (
 );
 
 // X9 REGISTER
-REG x09 (
+REG_NEG x09 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x09_set_wire&write_enable_in),  // Set input
@@ -238,7 +238,7 @@ REG x09 (
 );
 
 // X10 REGISTER
-REG x10 (
+REG_NEG x10 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x10_set_wire&write_enable_in),  // Set input
@@ -247,7 +247,7 @@ REG x10 (
 );
 
 // X11 REGISTER
-REG x11 (
+REG_NEG x11 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x11_set_wire&write_enable_in),  // Set input
@@ -256,7 +256,7 @@ REG x11 (
 );
 
 // X12 REGISTER
-REG x12 (
+REG_NEG x12 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x12_set_wire&write_enable_in),  // Set input
@@ -265,7 +265,7 @@ REG x12 (
 );
 
 // X13 REGISTER
-REG x13 (
+REG_NEG x13 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x13_set_wire&write_enable_in),  // Set input
@@ -274,7 +274,7 @@ REG x13 (
 );
 
 // X14 REGISTER
-REG x14 (
+REG_NEG x14 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x14_set_wire&write_enable_in),  // Set input
@@ -283,7 +283,7 @@ REG x14 (
 );
 
 // X15 REGISTER
-REG x15 (
+REG_NEG x15 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x15_set_wire&write_enable_in),  // Set input
@@ -292,7 +292,7 @@ REG x15 (
 );
 
 // X16 REGISTER
-REG x16 (
+REG_NEG x16 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x16_set_wire&write_enable_in),  // Set input
@@ -301,7 +301,7 @@ REG x16 (
 );
 
 // X17 REGISTER
-REG x17 (
+REG_NEG x17 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x17_set_wire&write_enable_in),  // Set input
@@ -310,7 +310,7 @@ REG x17 (
 );
 
 // X18 REGISTER
-REG x18 (
+REG_NEG x18 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x18_set_wire&write_enable_in),  // Set input
@@ -319,7 +319,7 @@ REG x18 (
 );
 
 // X19 REGISTER
-REG x19 (
+REG_NEG x19 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x19_set_wire&write_enable_in),  // Set input
@@ -328,7 +328,7 @@ REG x19 (
 );
 
 // X20 REGISTER
-REG x20 (
+REG_NEG x20 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x20_set_wire&write_enable_in),  // Set input
@@ -337,7 +337,7 @@ REG x20 (
 );
 
 // X21 REGISTER
-REG x21 (
+REG_NEG x21 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x21_set_wire&write_enable_in),  // Set input
@@ -346,7 +346,7 @@ REG x21 (
 );
 
 // X22 REGISTER
-REG x22 (
+REG_NEG x22 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x22_set_wire&write_enable_in),  // Set input
@@ -355,7 +355,7 @@ REG x22 (
 );
 
 // X23 REGISTER
-REG x23 (
+REG_NEG x23 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x23_set_wire&write_enable_in),  // Set input
@@ -364,7 +364,7 @@ REG x23 (
 );
 
 // X24 REGISTER
-REG x24 (
+REG_NEG x24 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x24_set_wire&write_enable_in),  // Set input
@@ -373,7 +373,7 @@ REG x24 (
 );
 
 // X25 REGISTER
-REG x25 (
+REG_NEG x25 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x25_set_wire&write_enable_in),  // Set input
@@ -382,7 +382,7 @@ REG x25 (
 );
 
 // X26 REGISTER
-REG x26 (
+REG_NEG x26 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x26_set_wire&write_enable_in),  // Set input
@@ -391,7 +391,7 @@ REG x26 (
 );
 
 // X27 REGISTER
-REG x27 (
+REG_NEG x27 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x27_set_wire&write_enable_in),  // Set input
@@ -400,7 +400,7 @@ REG x27 (
 );
 
 // X28 REGISTER
-REG x28 (
+REG_NEG x28 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x28_set_wire&write_enable_in),  // Set input
@@ -409,7 +409,7 @@ REG x28 (
 );
 
 // X29 REGISTER
-REG x29 (
+REG_NEG x29 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x29_set_wire&write_enable_in),  // Set input
@@ -418,7 +418,7 @@ REG x29 (
 );
 
 // X30 REGISTER
-REG x30 (
+REG_NEG x30 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x30_set_wire&write_enable_in),  // Set input
@@ -427,7 +427,7 @@ REG x30 (
 );
 
 // X31 REGISTER
-REG x31 (
+REG_NEG x31 (
   .clock_in(clock_in),                            // Clock input
   .reset_in(reset_in),                            // Reset input
   .set_in(int_reg_x31_set_wire&write_enable_in),  // Set input
