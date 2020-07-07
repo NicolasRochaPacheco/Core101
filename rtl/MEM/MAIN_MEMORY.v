@@ -32,12 +32,10 @@ end
 
 always@(*) begin
   red_addr = main_mem_addr_in[7:0];
-  // data_out = {memory[red_addr], memory[red_addr+1], memory[red_addr+2], memory[red_addr+3]};
   data_out = {memory[red_addr+3],
               memory[red_addr+2],
               memory[red_addr+1],
               memory[red_addr]};
-
 end
 
 assign main_mem_data_out = data_out;
