@@ -16,20 +16,22 @@
 
 module DECODE_UNIT (
   // Instruction coding inputs
-  input [4:0] opcode_in,
-  input [2:0] funct3_in,
-  input [6:0] funct7_in,
+  input [4:0] dec_opcode_in,
+  input [2:0] dec_funct3_in,
+  input [6:0] dec_funct7_in,
 
-  output imm_mux_sel_out,     // Immediate mux selection signal
-  output pc_mux_sel_out,      // PC src mux selection signal
-  output rd_write_enable_out, // Enable a write on RD
+  output dec_imm_mux_sel_out,     // Immediate mux selection signal
+  output dec_pc_mux_sel_out,      // PC src mux selection signal
+  output dec_rd_write_enable_out, // Enable a write on RD
+  output dec_rd_data_sel_out,     // Data selection sel signal for RD
+  output dec_jump_sel_out,        // Jump MUX sel signal
 
   // Exceptions signals
-  output invalid_ins_exception,
+  output dec_invalid_ins_exception,
 
   // Execution unit selection bus
-  output [2:0] exec_unit_sel_out,
-  output [3:0] exec_unit_uop_out
+  output [3:0] dec_exec_unit_sel_out,
+  output [3:0] dec_exec_unit_uop_out
 
 );
 
@@ -63,24 +65,25 @@ parameter SYSTEM = 5'b11100; // E
 parameter OPV = 5'b10101;    // E
 
 // Execution unit selection
-parameter INT_EXEC_SEL = 3'b001;
-parameter BRU_EXEC_SEL = 3'b011;
-parameter LSU_EXEC_SEL = 3'b010;
-parameter VEC_EXEC_SEL = 3'b100;
+parameter INT_EXEC_SEL = 4'b0001;
+parameter BRU_EXEC_SEL = 4'b0010;
+parameter LSU_EXEC_SEL = 4'b0100;
+parameter VEC_EXEC_SEL = 4'b1000;
 // ====================================
 
 
 // ====================================
 // Registers definition
 // ====================================
-reg [2:0] exec_sel_reg;
+reg [3:0] exec_sel_reg;
 reg [3:0] exec_uop_reg;
 reg pc_mux_sel_reg;
 reg imm_mux_sel_reg;
 // ====================================
 
-wire rd_write_wire;
-
+wire rd_write_wire;     //
+wire rd_data_sel_wire;  //
+wire jump_sel_wire;
 
 // ====================================
 // COMBINATIONAL LOGIC
@@ -91,7 +94,7 @@ always@(*) begin
   // LSU opcode: LOAD, STORE
   // INT opcode: E.E.
   // VEC opcode: OP-V
-  case(opcode_in)
+  case(dec_opcode_in)
     LOAD:     exec_sel_reg = LSU_EXEC_SEL;
     STORE:    exec_sel_reg = LSU_EXEC_SEL;
     OPV:      exec_sel_reg = VEC_EXEC_SEL;
@@ -103,23 +106,23 @@ always@(*) begin
     JAL:      exec_sel_reg = INT_EXEC_SEL;
     JALR:     exec_sel_reg = INT_EXEC_SEL;
     SYSTEM:   exec_sel_reg = INT_EXEC_SEL;
-    default:  exec_sel_reg = 3'b000; // No opcode identified. Raises exception
+    default:  exec_sel_reg = 4'b0000; // No opcode identified. Raises exception
   endcase
 
   // uOp generation. The hard one
-  case(opcode_in)
+  case(dec_opcode_in)
     // OP opcode.
     OP:       begin
-                case(funct3_in)
-                  3'b000: if (funct7_in == 7'b0000000)
+                case(dec_funct3_in)
+                  3'b000: if (dec_funct7_in == 7'b0000000)
                               exec_uop_reg = 4'b0000; // ADD on INT_EXEC
-                          else if (funct7_in == 7'b0100000)
+                          else if (dec_funct7_in == 7'b0100000)
                               exec_uop_reg = 4'b0001; // SUB on INT_EXEC
                   3'b001: exec_uop_reg = 4'b1111;     // SLL on INT_EXEC
                   3'b010: exec_uop_reg = 4'b1010;     // SLT on INT_EXEC
                   3'b011: exec_uop_reg = 4'b1011;     // SLTU on INT_EXEC
                   3'b100: exec_uop_reg = 4'b0100;     // XOR on INT_EXEC
-                  3'b101: if (funct7_in == 7'b0000000)
+                  3'b101: if (dec_funct7_in == 7'b0000000)
                             exec_uop_reg = 4'b1110;   // SRL on INT_EXEC
                           else
                             exec_uop_reg = 4'b1101;   // SRA on INT_EXEC
@@ -129,13 +132,13 @@ always@(*) begin
               end
 
     // OP-IMM opcode
-    OPIMM:    case(funct3_in)
+    OPIMM:    case(dec_funct3_in)
                 3'b000: exec_uop_reg = 4'b0000; // ADD on INT_EXEC
                 3'b001: exec_uop_reg = 4'b1111; // SLL on INT_EXEC
                 3'b010: exec_uop_reg = 4'b1010; // SLT on INT_EXEC
                 3'b011: exec_uop_reg = 4'b1011; // SLTU on INT_EXEC
                 3'b100: exec_uop_reg = 4'b0100; // XOR on INT_EXEC
-                3'b101: if (funct7_in == 7'b0000000)
+                3'b101: if (dec_funct7_in == 7'b0000000)
                           exec_uop_reg = 4'b1110; // SRL on INT_EXEC
                         else
                           exec_uop_reg = 4'b1101; // SRA on INT_EXEC
@@ -144,7 +147,7 @@ always@(*) begin
               endcase
 
     // LOAD opcode
-    LOAD:     case(funct3_in)
+    LOAD:     case(dec_funct3_in)
                 3'b000:   exec_uop_reg = 4'b0001; // LB on LSU_EXEC
                 3'b001:   exec_uop_reg = 4'b0010; // LH on LSU_EXEC
                 3'b010:   exec_uop_reg = 4'b0011; // LW on LSU_EXEC
@@ -154,7 +157,7 @@ always@(*) begin
               endcase
 
     // STORE opcode
-    STORE:    case(funct3_in)
+    STORE:    case(dec_funct3_in)
                 3'b000:   exec_uop_reg = 4'b1001; // SB on LSU_EXEC
                 3'b001:   exec_uop_reg = 4'b1010; // SH on LSU_EXEC
                 3'b010:   exec_uop_reg = 4'b1100; // SW on LSU_EXEC
@@ -162,15 +165,21 @@ always@(*) begin
               endcase
 
     // BRANCH opcode
-    BRANCH:   case(funct3_in)
+    BRANCH:   case(dec_funct3_in)
                 3'b000:   exec_uop_reg = 4'b0000; // BEQ on BRU_EXEC
                 3'b001:   exec_uop_reg = 4'b0001; // BNE on BRU_EXEC
                 3'b100:   exec_uop_reg = 4'b0010; // BLT on BRU_EXEC
                 3'b101:   exec_uop_reg = 4'b0011; // BGE on BRU_EXEC
                 3'b110:   exec_uop_reg = 4'b0110; // BLTU on BRU_EXEC
                 3'b111:   exec_uop_reg = 4'b0111; // BGEU on BRU_EXEC
-                default:  exec_uop_reg = 4'b1000; // funct3 not valid. Raises exception.
+                default:  exec_uop_reg = 4'b1111; // funct3 not valid. Raises exception.
               endcase
+
+    // JAL opcode
+    JAL:      exec_uop_reg = 4'b1000;
+
+    // JALR opcode
+    JALR:     exec_uop_reg = 4'b0000;
 
     // LUI opcode
     LUI:      exec_uop_reg = 4'b1001; // LUI on INT_EXEC (buffer rs2)
@@ -184,21 +193,21 @@ always@(*) begin
 
   // Will use PC value?
   // opcodes: AUIPC, JAL, JALR, BRANCH
-  case(opcode_in)
+  case(dec_opcode_in)
     AUIPC:    pc_mux_sel_reg = 1'b1;
     JAL:      pc_mux_sel_reg = 1'b1;
-    JALR:     pc_mux_sel_reg = 1'b1;
+    JALR:     pc_mux_sel_reg = 1'b0;
     BRANCH:   pc_mux_sel_reg = 1'b0;
     default:  pc_mux_sel_reg = 1'b0; // E.E.
   endcase
 
   // Will use an immediate value?
   // opcodes: LOAD, STORE, OP-IMM, JAL, JALR, AUIPC, LUI
-  case(opcode_in)
+  case(dec_opcode_in)
     LOAD:     imm_mux_sel_reg = 1'b1;
     STORE:    imm_mux_sel_reg = 1'b1;
     OPIMM:    imm_mux_sel_reg = 1'b1;
-    JAL:      imm_mux_sel_reg = 1'b1;
+    JAL:      imm_mux_sel_reg = 1'b0;
     JALR:     imm_mux_sel_reg = 1'b1;
     AUIPC:    imm_mux_sel_reg = 1'b1;
     LUI:      imm_mux_sel_reg = 1'b1;
@@ -208,7 +217,7 @@ always@(*) begin
 
   // Will writeback on a register?
   // opcodes: LOAD, OPV, OPIMM, AUIPC, OP, LUI, JAL, JALR
-  case (opcode_in)
+  case (dec_opcode_in)
     LOAD:   rd_write_wire = 1'b1;
     OPV:    rd_write_wire = 1'b1;
     OPIMM:  rd_write_wire = 1'b1;
@@ -217,7 +226,21 @@ always@(*) begin
     LUI:    rd_write_wire = 1'b1;
     JAL:    rd_write_wire = 1'b1;
     JALR:   rd_write_wire = 1'b1;
+    BRANCH: rd_write_wire = 1'b0;
     default:rd_write_wire = 1'b0;
+  endcase
+
+  // Will write a data value or will write PC+4?
+  case(dec_opcode_in)
+    JAL:    rd_data_sel_wire = 1'b1;  //
+    JALR:   rd_data_sel_wire = 1'b1;  //
+    default: rd_data_sel_wire = 1'b0; // E.E.
+  endcase
+
+  // Is it a jump (JALR)
+  case (dec_opcode_in)
+    JALR: jump_sel_wire = 1'b1;
+    default: jump_sel_wire = 1'b0;
   endcase
 
 end
@@ -227,14 +250,16 @@ end
 // OUTPUT LOGIC
 // ====================================
 // Execution unit selection output
-assign exec_unit_sel_out = exec_sel_reg;
-assign exec_unit_uop_out = exec_uop_reg;
+assign dec_exec_unit_sel_out = exec_sel_reg;
+assign dec_exec_unit_uop_out = exec_uop_reg;
 
 // PC mux selection output
-assign pc_mux_sel_out = pc_mux_sel_reg;
-assign rd_write_enable_out = rd_write_wire;
+assign dec_pc_mux_sel_out = pc_mux_sel_reg;
+assign dec_rd_write_enable_out = rd_write_wire;
+assign dec_rd_data_sel_out = rd_data_sel_wire;
+assign dec_jump_sel_out = jump_sel_wire;
 
 // Immediate value selection output
-assign imm_mux_sel_out = imm_mux_sel_reg;
+assign dec_imm_mux_sel_out = imm_mux_sel_reg;
 
 endmodule
