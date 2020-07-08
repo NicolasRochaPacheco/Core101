@@ -1,6 +1,17 @@
 #!/bin/bash
 # l0g1c2docker.bash
 
+# Checks if output folder exists. If folder does not exist it is created.
+if [ -d ./out ]
+  then
+    echo "Output folder exists"
+  else
+    echo "Output folder does not exist. Creating the output folder."
+    mkdir ./out
+fi
+
+
+
 # Compress files and copy them inside Docker container
 tar -czf ../../L0G1C101.tar.gz ../../L0G1C101/
 docker cp ../../L0G1C101.tar.gz core101:/opt/L0G1C101.tar.gz
