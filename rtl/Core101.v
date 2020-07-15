@@ -115,11 +115,17 @@ wire [31:0] bru_target_address_wire;
 // Integer execution unit
 wire [31:0] int_exec_result_wire;
 
+// Load/Store Execution Unit
+wire [31:0] lsu_exec_result_wire;
+
 // EX output MUX
 wire [31:0] ex_result_wire;
 
 // PC INC on WB
 wire [31:0] wb_pc_inc_wire;
+
+// Output encoder SEL signal
+wire [1:0] ex_encoder_sel_wire;
 
 // Output MUX
 wire [31:0] writeback_wire;
@@ -325,12 +331,22 @@ MUX_A imm_mux (
   .data_out(b_data_wire)
 );
 
+// Integer execution unit
 INT_EXEC int_exec0 (
   .a_data_in(a_data_wire),
   .b_data_in(b_data_wire),
   .enable_in(is_ex_reg_data_wire[154]),
   .uop_in(is_ex_reg_data_wire[148:145]),
   .res_data_out(int_exec_result_wire)
+);
+
+// Load store unit
+LSU_EXEC lsu_exec0 (
+  .enable_in(is_ex_reg_data_wire[153]),
+  .uop_in(),
+  .a_data_in(),
+  .b_data_in(),
+  .res_data_out()
 );
 
 BRU bru_exec0 (
@@ -341,17 +357,24 @@ BRU bru_exec0 (
   .rs1_in(a_data_wire),                   // R[rs1] data input
   .rs2_in(b_data_wire),                   // R[rs2] data input
   .imm_in(is_ex_reg_data_wire[63:32]),    // Immediate value.
-  .flush_out(bru_flush_wire),                 // Flush signal output
+  .flush_out(bru_flush_wire),             // Flush signal output
   .taken_out(taken_wire),                 // High if a branch was taken
   .enable_out(branch_enable_wire),        // Enable signal for predictor
   .mux_out(bru_ifu_mux_sel_wire),         // PC mux selection output
   .target_out(bru_target_address_wire)    // PC new address output
 );
 
+// MEncoder used for selecting the appropriate output value
+ENCODE_B ex_encoder0 (
+  .data_in(is_ex_reg_data_wire[154:151]),
+  .data_out(ex_encoder_sel_wire)
+);
+
+// Output selection
 MUX_B ex_out_mux0 (
-  .data_sel_in(2'b00),
+  .data_sel_in(ex_encoder_sel_wire),
   .a_data_src_in(int_exec_result_wire),
-  .b_data_src_in(),
+  .b_data_src_in(lsu_exec_result_wire),
   .c_data_src_in(),
   .d_data_src_in(),
   .data_out(ex_result_wire)
