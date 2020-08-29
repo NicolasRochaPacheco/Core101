@@ -51,7 +51,6 @@ int main(int argc, char **argv){
   FILE *output_file;
   output_file = fopen("output_data.txt", "w");
 
-
   // Creates the clock array
   for(int i=0; i<N_CLOCKS*RESOLUTION; ++i){
     if (i%RESOLUTION <= (RESOLUTION/2-1)){
