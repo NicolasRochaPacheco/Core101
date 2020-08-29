@@ -16,7 +16,7 @@ RUN apt-get install -y \
   build-essential\
   git\
   make\
-  verilator==3.916
+  verilator
 
 #--------------------------------------
 # Source code download
