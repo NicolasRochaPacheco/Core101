@@ -32,23 +32,15 @@ VPATH = $(CUR_DIR)/rtl/Core101_top.v \
 
 CPATH = $(CUR_DIR)/src/core101_testbench.cpp
 
-
-Core101:
-	@echo 'Building Core101'
+simulate:
+	@echo "Simulating Core101"
 	$(VERILATOR) --cc $(VPATH) --exe $(CPATH)
 	make -j -C obj_dir -f VCore101_top.mk
 
-# Verilator test with a single module with its testbench
-adder:
-	echo 'Building a single adder'
-	$(VERILATOR) -Wall -cc $(CUR_DIR)/rtl/MISC/ADDER.v --exe $(CUR_DIR)/src/adder_testbench.cpp -I$(I_DIR)
-	make -j -C obj_dir -f VADDER.mk
-
-# Verilator test with a composed moule with its testbench
-cascade:
-	echo 'Building a cascade adder'
-	$(VERILATOR) -Wall -cc $(CUR_DIR)/rtl/MISC/CASCADE.v $(CUR_DIR)/rtl/MISC/ADDER.v --exe $(CUR_DIR)/src/cascade_testbench.cpp
-	make -j -C obj_dir -f VCASCADE.mk
+Core101:
+	@echo 'Building Core101 and uploading it to FPGA'
+	
 
 clean:
-	@rm -r obj_dir
+	@if [ -d "obj_dir" ]; then rm -r obj_dir; else echo "Directory does not exists."; fi
+	@if [ -d "out" ]; then rm -r out; else echo "Directory does not exists."; fi
