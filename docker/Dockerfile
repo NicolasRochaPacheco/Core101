@@ -1,5 +1,8 @@
 # A Dockerfile for Core101
-FROM ubuntu:latest
+
+# Uses Ubuntu 18 as source
+FROM ubuntu:bionic
+
 MAINTAINER Nicolas Rocha Pacheco (n.rocha11@uniandes.edu.co)
 
 #--------------------------------------
@@ -13,7 +16,7 @@ RUN apt-get install -y \
   build-essential\
   git\
   make\
-  verilator
+  verilator==3.916
 
 #--------------------------------------
 # Source code download
