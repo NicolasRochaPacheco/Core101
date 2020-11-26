@@ -73,8 +73,8 @@ DATA_MEM #(.XLEN(32)) data_memory (
   .data_mem_write_in(data_mem_write_wire),
   .data_mem_addr_in(data_mem_addr_wire),
   .data_mem_data_in(data_mem_data_inbound_wire),
-  .data_mem_data_out(data_mem_data_outbound_wire)
-  .data_mem_ready_out(data_mem_ready_wire),
+  .data_mem_data_out(data_mem_data_outbound_wire),
+  .data_mem_ready_out(data_mem_ready_wire)
 );
 
 endmodule
