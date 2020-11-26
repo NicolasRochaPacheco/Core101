@@ -14,124 +14,67 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-module Core101_top (
+module Core101_top #(
+  parameter XLEN = 32
+) (
   input clock_in,
-  input reset_in,
-
-  // IF/ID debug signals
-  output if_id_prediction_out,
-  output [31:0] ir_data_if_id_out,
-  output [31:0] pc_data_if_id_out,
-
-  // ID/IS debug signals
-  output [1:0] id_is_fwd_out,
-  output [31:0] imm_data_id_is_out,
-  output [31:0] pc_data_id_is_out,
-
-  // IS/EX debug signals
-  output bru_enable_out,
-  output branch_taken_out,
-  output rd_write_enable_out,
-  output [3:0] int_uop_out,
-  output [3:0] lsu_uop_out,
-  output [3:0] vec_uop_out,
-  output [3:0] bru_uop_out,
-  output [4:0] rd_addr_ex_wb_out,
-
-  output [31:0] wb_data_out,
-  output [31:0] ex_a_data_out,
-  output [31:0] ex_b_data_out,
-
-  output jump_mux_sel_out,
-  output [31:0] jump_target_wb_out
+  input reset_in
 );
 
-// Dummy memory definition
-wire [31:0] ins_mem_addr_wire;
-wire [31:0] ins_mem_data_wire;
+// =======================================================================
+// Instruction memory wire definition
+wire ins_mem_valid_wire;
+wire ins_mem_ready_wire;
+wire [XLEN-1:0] ins_mem_addr_wire;
+wire [XLEN-1:0] ins_mem_data_wire;
 
-// Debug wire from IF/ID
-wire if_id_prediction_wire;
-wire [31:0] pc_data_if_id_wire;
-wire [31:0] ir_data_if_id_wire;
+// Data memory wire definition
+wire data_mem_valid_wire;
+wire data_mem_ready_wire;
+wire data_mem_write_wire;
+wire [XLEN-1:0] data_mem_addr_wire;
+wire [XLEN-1:0] data_mem_data_inbound_wire;
+wire [XLEN-1:0] data_mem_data_outbound_wire;
+// =======================================================================
 
-// Debug wire from ID/IS
-wire [1:0] id_is_fwd_wire;
-wire [31:0] imm_data_wire;
-wire [31:0] pc_id_is_data_wire;
 
-wire write_enable_wire;
-wire [3:0] int_uop_wire;
-wire [4:0] rd_addr_ex_wb_wire;
-
-wire jump_mux_sel_wire;
-wire [31:0] wb_data_wire;
-wire [31:0] jump_target_wb_wire;
-
-wire [31:0] ex_a_data_wire;
-wire [31:0] ex_b_data_wire;
-
-//
+// Core101 instantiation
 Core101 core101 (
+  // Clock and reset in
   .clock_in(clock_in),
   .reset_in(reset_in),
-  .ins_mem_data_in(ins_mem_data_wire),
+
+  // Instruction memory interface
+  .ins_mem_valid_out(ins_mem_valid_wire),
   .ins_mem_addr_out(ins_mem_addr_wire),
+  .ins_mem_ready_in(ins_mem_ready_wire),
+  .ins_mem_data_in(ins_mem_data_wire),
 
-  // IF debug signals
-  .if_id_prediction_out(if_id_prediction_wire),
-  .ir_data_if_id_out(ir_data_if_id_wire),
-  .pc_data_if_id_out(pc_data_if_id_wire),
-
-  // ID/IS
-  .id_is_fwd_out(id_is_fwd_wire),
-  .imm_id_is_data_out(imm_data_wire),
-  .pc_id_is_data_out(pc_id_is_data_wire),
-
-  .rd_addr_ex_wb_out(rd_addr_ex_wb_wire),
-  .wb_data_out(wb_data_wire),
-  .rd_write_enable_out(write_enable_wire),
-  .int_uop_out(int_uop_wire),
-  .lsu_uop_out(),
-  .vec_uop_out(),
-  .bru_uop_out(),
-  .bru_enable_out(),
-  .branch_taken_out(),
-  .ex_a_data_out(ex_a_data_wire),
-  .ex_b_data_out(ex_b_data_wire),
-
-  .jump_mux_sel_out(jump_mux_sel_wire),
-  .jump_target_wb_out(jump_target_wb_wire)
+  // Data memory interface
+  data_mem_valid_out(data_mem_valid_wire),
+  data_mem_write_out(data_mem_write_wire),
+  data_mem_addr_out(data_mem_addr_wire),
+  data_mem_data_out(data_mem_data_outbound_wire),
+  data_mem_data_in(data_mem_data_inbound_wire),
+  data_mem_ready_in(data_mem_ready_wire)
 );
 
-//
-MAIN_MEMORY mem (
-  .main_mem_addr_in(ins_mem_addr_wire),
-  .main_mem_data_out(ins_mem_data_wire)
+// Instruction memory instantiation
+INS_MEM #(.XLEN(32)) ins_memory (
+  .ins_mem_valid_in(ins_mem_valid_wire),
+  .ins_mem_addr_in(ins_mem_addr_wire),
+  .ins_mem_ready_out(ins_mem_ready_wire),
+  .ins_mem_data_out(ins_mem_data_wire)
 );
 
+// Data memory instantiation
+DATA_MEM data_memory (
+  .data_mem_valid_in(data_mem_valid_wire),
+  .data_mem_write_in(data_mem_write_wire),
+  .data_mem_addr_in(data_mem_addr_wire),
+  .data_mem_data_in(data_mem_data_inbound_wire),
+  .data_mem_data_out(data_mem_data_outbound_wire)
+  .data_mem_ready_out(data_mem_ready_wire),
+);
 
-// IF/ID
-assign if_id_prediction_out = if_id_prediction_wire;
-assign ir_data_if_id_out = ir_data_if_id_wire;
-assign pc_data_if_id_out = pc_data_if_id_wire;
-
-// ID/IS
-assign id_is_fwd_out = id_is_fwd_wire;
-assign imm_data_id_is_out = imm_data_wire;
-assign pc_data_id_is_out = pc_id_is_data_wire;
-
-// IS/EX
-assign int_uop_out = int_uop_wire;
-assign ex_a_data_out = ex_a_data_wire;
-assign ex_b_data_out = ex_b_data_wire;
-
-// EX/WB
-assign jump_mux_sel_out = jump_mux_sel_wire;
-assign wb_data_out = wb_data_wire;
-assign rd_addr_ex_wb_out = rd_addr_ex_wb_wire;
-assign rd_write_enable_out = write_enable_wire;
-assign jump_target_wb_out = jump_target_wb_wire;
-
-
-endmodule // Core101_top
+endmodule
