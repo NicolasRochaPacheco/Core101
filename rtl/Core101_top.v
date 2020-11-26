@@ -25,16 +25,16 @@ module Core101_top #(
 // Instruction memory wire definition
 wire ins_mem_valid_wire;
 wire ins_mem_ready_wire;
-wire [XLEN-1:0] ins_mem_addr_wire;
-wire [XLEN-1:0] ins_mem_data_wire;
+wire [31:0] ins_mem_addr_wire;
+wire [31:0] ins_mem_data_wire;
 
 // Data memory wire definition
 wire data_mem_valid_wire;
 wire data_mem_ready_wire;
 wire data_mem_write_wire;
-wire [XLEN-1:0] data_mem_addr_wire;
-wire [XLEN-1:0] data_mem_data_inbound_wire;
-wire [XLEN-1:0] data_mem_data_outbound_wire;
+wire [31:0] data_mem_addr_wire;
+wire [31:0] data_mem_data_inbound_wire;
+wire [31:0] data_mem_data_outbound_wire;
 // =======================================================================
 
 
@@ -51,12 +51,12 @@ Core101 core101 (
   .ins_mem_data_in(ins_mem_data_wire),
 
   // Data memory interface
-  data_mem_valid_out(data_mem_valid_wire),
-  data_mem_write_out(data_mem_write_wire),
-  data_mem_addr_out(data_mem_addr_wire),
-  data_mem_data_out(data_mem_data_outbound_wire),
-  data_mem_data_in(data_mem_data_inbound_wire),
-  data_mem_ready_in(data_mem_ready_wire)
+  .data_mem_valid_out(data_mem_valid_wire),
+  .data_mem_write_out(data_mem_write_wire),
+  .data_mem_addr_out(data_mem_addr_wire),
+  .data_mem_data_out(data_mem_data_outbound_wire),
+  .data_mem_ready_in(data_mem_ready_wire),
+  .data_mem_data_in(data_mem_data_inbound_wire)
 );
 
 // Instruction memory instantiation
@@ -68,7 +68,7 @@ INS_MEM #(.XLEN(32)) ins_memory (
 );
 
 // Data memory instantiation
-DATA_MEM data_memory (
+DATA_MEM #(.XLEN(32)) data_memory (
   .data_mem_valid_in(data_mem_valid_wire),
   .data_mem_write_in(data_mem_write_wire),
   .data_mem_addr_in(data_mem_addr_wire),
