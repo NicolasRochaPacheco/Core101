@@ -18,28 +18,29 @@
 module PC_CALC #(
   parameter XLEN = 32
 )(
-  input pc_calc_offset_en_in,
-  input pc_calc_target_en_in,
+  // Falgs for non-INC PC calculation
+  input pc_calc_correction_en_in,
   input pc_calc_prediction_en_in,
+
+  // Input for current PC value
   input [XLEN-1:0] pc_calc_current_in,
-  input [XLEN-1:0] pc_calc_offset_in,
-  input [XLEN-1:0] pc_calc_target_in,
+
+  // Data input for non-INC PC calculation
+  input [XLEN-1:0] pc_calc_correction_in,
   input [XLEN-1:0] pc_calc_prediction_in,
+
+  // Output of PRED flag and calculated PC value
   output pc_calc_pred_out,
   output [XLEN-1:0] pc_calc_addr_out
 );
 
 // Procedural block for PC address calculation
 always @ ( * ) begin
-  case ({pc_calc_offset_en_in, pc_calc_target_en_in, pc_calc_prediction_en_in})
-    3'b000: pc_calc_addr_out = pc_calc_current_in + 4;
-    3'b001: pc_calc_addr_out = pc_calc_prediction_in;
-    3'b010: pc_calc_addr_out = pc_calc_target_in;
-    3'b011: pc_calc_addr_out = pc_calc_target_in;
-    3'b100: pc_calc_addr_out = pc_calc_current_in + pc_calc_offset_in;
-    3'b101: pc_calc_addr_out = pc_calc_current_in + pc_calc_offset_in;
-    3'b110: pc_calc_addr_out = pc_calc_target_in;
-    3'b111: pc_calc_addr_out = pc_calc_target_in;
+  case ({pc_calc_correction_en_in, pc_calc_prediction_en_in})
+    2'b00: pc_calc_addr_out = pc_calc_current_in + 4; // INC
+    2'b01: pc_calc_addr_out = pc_calc_prediction_in;  // PRED + J
+    2'b10: pc_calc_addr_out = pc_calc_correction_in;  // CORRECTION
+    2'b11: pc_calc_addr_out = pc_calc_correction_in;  // CORRECTION
   endcase
 end
 
