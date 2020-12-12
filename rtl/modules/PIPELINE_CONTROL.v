@@ -1,4 +1,4 @@
-// General adder module definition
+// Pipeline control module definition
 // Copyright (C) 2019 Nicolas Rocha Pacheco
 //
 // This program is free software: you can redistribute it and/or modify
@@ -15,24 +15,21 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-//-----------------------------------------------
-//  MODULE DEFINITION
-//-----------------------------------------------
-module ADDER #(parameter DATA_WIDTH=32)(
+module PIPELINE_CONTROL (
+  input pipeline_clock_in,
+  input pipeline_reset_in,
 
-  // Data inputs
-  input [DATA_WIDTH-1:0] a_operand_in,
-  input [DATA_WIDTH-1:0] b_operand_in,
+  // Instruction memory jump flags
+  input pipeline_offset_flag_in,
+  input pipeline_target_flag_in,
+  input pipeline_prediction_flag_in,
 
-  // Data outputs
-  output [DATA_WIDTH-1:0] add_result_out
+  output pipeline_ins_mem_valid_out,
+  input pipeline_ins_mem_ready_in,
+
+  output pipeline_pc_if_set_out,
+  output pipeline_if_dec_set_out
 );
 
 
-//-----------------------------------------------
-//  COMBINATIONAL LOGIC
-//-----------------------------------------------
-assign add_result_out = a_operand_in + b_operand_in;
-
-
-endmodule // ADD
+endmodule
