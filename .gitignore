@@ -1,4 +1,12 @@
-out
+# Ignores output folder where waves and .txt files are stored
+out/
+
+# Ignores object directory where Verilator output is stored
 obj_dir
-rtl/MEM/*.hex
-doc/resources/source/*.drawio
+
+# Ignores modelsim work dir and transcript
+work/
+transcript
+
+# Ignores HEX files from memory RTL modules
+rtl/memory/*.hex
