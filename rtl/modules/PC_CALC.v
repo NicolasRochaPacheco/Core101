@@ -30,8 +30,8 @@ module PC_CALC #(
   input [XLEN-1:0] pc_calc_prediction_in,
 
   // Output of PRED flag and calculated PC value
-  output pc_calc_pred_out,
-  output [XLEN-1:0] pc_calc_addr_out
+  output reg pc_calc_pred_out,
+  output reg [XLEN-1:0] pc_calc_addr_out
 );
 
 // Procedural block for PC address calculation
@@ -42,6 +42,9 @@ always @ ( * ) begin
     2'b10: pc_calc_addr_out = pc_calc_correction_in;  // CORRECTION
     2'b11: pc_calc_addr_out = pc_calc_correction_in;  // CORRECTION
   endcase
+
+  pc_calc_pred_out = pc_calc_prediction_en_in & !pc_calc_correction_en_in;
+
 end
 
 endmodule
