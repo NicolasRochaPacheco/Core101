@@ -6,6 +6,20 @@
 #include "verilated.h"
 #include "VCore101_top.h"
 
+#if VM_TRACE
+  #include <verilated_vcd_c.h>
+#endif
+
+// Instansiates the module
+VCore101_top* core;
+
+// Current simulation time
+vluint64_t main_time = 0;
+
+//
+double sc_time_stamp() {
+  return main_time;
+}
 
 int main(int argc, char **argv){
 
@@ -13,7 +27,16 @@ int main(int argc, char **argv){
   Verilated::commandArgs(argc, argv);
 
   // Creates the Core101 object
-  VCore101_top* core = new VCore101_top;
+  core = new VCore101_top;
+
+#if VM_TRACE
+  VerilatedVcdC* tfp = new VerilatedVcdC;
+  Verilated::traceEverOn(true);  // Verilator must compute traced signals
+  VL_PRINTF("Enabling waves into /output.vcd...\n");
+  tfp = new VerilatedVcdC;
+  core->trace(tfp, 99);  // Trace 99 levels of hierarchy
+  tfp->open("./out/output.vcd");  // Open the dump file
+#endif
 
   // Clock signal parameters
   const int N_CLOCKS = 64;
@@ -54,7 +77,18 @@ int main(int argc, char **argv){
 
     // Generates core outputs
     core->eval();
+
+    #if VM_TRACE
+      if (tfp) tfp->dump(main_time);
+    #endif
+
+    // Time passes
+    main_time++;
+
   }
+
+  //
+  if (tfp) { tfp->close(); }
 
   // Exits
   exit(EXIT_SUCCESS);
