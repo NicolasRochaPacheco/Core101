@@ -4,7 +4,13 @@
 ---
 
 ## Using Core101
-<p align="justify">This part describes how to use Core101. You will find a guide in how to clone the repository, how to setup the docker container, and how to run programs. For testing purposes we use a program that outputs the numbers from the Fibonacci sequence.</p>
+<p align="justify">This part describes how to use Core101. You will find a guide in how to clone the repository, how to setup the docker container, and how to run programs. For testing purposes we use a program that outputs the numbers from the Fibonacci sequence. If you are not interested on using the docker container you will need to have the following prerequisites.</p>
+
+<ol>
+	<li>Verilator installed and added to PATH.</li>
+	<li>Modelsim installed and added to PATH.</li>
+	<li>Python 3.</li>
+</ol>
 
 ### Cloning Core101
 <p align="justify">To clone Core101 in your computer run the following commands in the console:</p>
@@ -55,5 +61,3 @@ As stated before, Core101 will support a 32-bits RISC-V ISA, consisting of the b
 | BGE   | :heavy_check_mark: | SW   | :heavy_check_mark: | ADD   | :heavy_check_mark: | FENCE  |                    |
 | BLTU  | :heavy_check_mark: | ADDI | :heavy_check_mark: | SUB   | :heavy_check_mark: | ECALL  |                    |
 | BGEU  | :heavy_check_mark: | SLTI | :heavy_check_mark: | SLL   | :heavy_check_mark: | EBREAK |                    |
-
-
