@@ -18,33 +18,26 @@ module FORWARDING_UNIT(
   input [4:0] fwd_if_ra_addr_in,  // RS1 on ID
   input [4:0] fwd_if_rb_addr_in,  // RS2 on ID
   input [4:0] fwd_id_rd_addr_in,  // RD on IS
-  output [1:0] fwd_mux_sel_out   // FWD MUX values
+  output reg [1:0] fwd_mux_sel_out   // FWD MUX values
 );
-
-// ========================================================
-//                      WIRE DEFINITION
-// ========================================================
-wire [1:0] fwd_mux_sel_wire;
 
 // ========================================================
 //                      COMBINATIONAL LOGIC
 // ========================================================
 always@(*) begin
-  // Sets every signal on zero
-  fwd_mux_sel_wire = 2'b00;
 
   // Compares source register A
   if(fwd_if_ra_addr_in != 5'b00000)
-    fwd_mux_sel_wire[0] = (fwd_if_ra_addr_in==fwd_id_rd_addr_in) ? 1'b1:1'b0;
+    fwd_mux_sel_out[0] = (fwd_if_ra_addr_in==fwd_id_rd_addr_in) ? 1'b1:1'b0;
+  else
+    fwd_mux_sel_out[0] = 1'b0;
 
   // Compares source register B
   if(fwd_if_rb_addr_in != 5'b00000)
-    fwd_mux_sel_wire[1] = (fwd_if_rb_addr_in==fwd_id_rd_addr_in) ? 1'b1:1'b0;
+    fwd_mux_sel_out[1] = (fwd_if_rb_addr_in==fwd_id_rd_addr_in) ? 1'b1:1'b0;
+  else
+    fwd_mux_sel_out[1] = 1'b0;
 end
 
-// ========================================================
-//                      OUTPUT LOGIC
-// ========================================================
-assign fwd_mux_sel_out = fwd_mux_sel_wire;
 
 endmodule // FORWARDING_UNIT
