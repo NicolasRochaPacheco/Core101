@@ -16,7 +16,7 @@
 
 module DECODE_UNIT (
   // Instruction coding inputs
-  input [4:0] dec_opcode_in,
+  input [6:0] dec_opcode_in,
   input [2:0] dec_funct3_in,
   input [6:0] dec_funct7_in,
 
@@ -52,17 +52,17 @@ module DECODE_UNIT (
 // Parameter definition
 // ====================================
 // Opcode in possible values
-parameter LOAD = 5'b00000;   // E U
-parameter OPIMM = 5'b00100;  // E U
-parameter AUIPC = 5'b00101;  // E U
-parameter STORE = 5'b01000;  // E U
-parameter OP = 5'b01100;     // E U
-parameter LUI = 5'b01101;    // E U
-parameter BRANCH = 5'b11000; // E U*
-parameter JALR = 5'b11001;   // E
-parameter JAL = 5'b11011;    // E
-parameter SYSTEM = 5'b11100; // E
-parameter OPV = 5'b10101;    // E
+parameter LOAD = 7'b0000011;   // E U
+parameter OPIMM = 7'b0010011;  // E U
+parameter AUIPC = 7'b0010111;  // E U
+parameter STORE = 7'b0100011;  // E U
+parameter OP = 7'b0110011;     // E U
+parameter LUI = 7'b0110111;    // E U
+parameter BRANCH = 7'b1100011; // E U*
+parameter JALR = 7'b1100111;   // E
+parameter JAL = 7'b1101111;    // E
+parameter SYSTEM = 7'b1110011; // E
+parameter OPV = 7'b1010111;    // E
 
 // Execution unit selection
 parameter INT_EXEC_SEL = 4'b0001;
@@ -79,16 +79,32 @@ reg [3:0] exec_sel_reg;
 reg [3:0] exec_uop_reg;
 reg pc_mux_sel_reg;
 reg imm_mux_sel_reg;
+reg rd_write_reg;     //
+reg rd_data_sel_reg;  //
+reg jump_sel_reg;
+reg invalid_ins;
 // ====================================
-
-wire rd_write_wire;     //
-wire rd_data_sel_wire;  //
-wire jump_sel_wire;
 
 // ====================================
 // COMBINATIONAL LOGIC
 // ====================================
 always@(*) begin
+
+  // Invalid instruction exception
+  case(dec_opcode_in)
+    LOAD:     invalid_ins = 1'b0;
+    STORE:    invalid_ins = 1'b0;
+    OPV:      invalid_ins = 1'b0;
+    OPIMM:    invalid_ins = 1'b0;
+    AUIPC:    invalid_ins = 1'b0;
+    OP:       invalid_ins = 1'b0;
+    LUI:      invalid_ins = 1'b0;
+    BRANCH:   invalid_ins = 1'b0;
+    JAL:      invalid_ins = 1'b0;
+    JALR:     invalid_ins = 1'b0;
+    SYSTEM:   invalid_ins = 1'b0;
+    default:  invalid_ins = 1'b1;
+  endcase
 
   // Execution unit selection.
   // LSU opcode: LOAD, STORE
@@ -106,7 +122,10 @@ always@(*) begin
     JAL:      exec_sel_reg = INT_EXEC_SEL;
     JALR:     exec_sel_reg = INT_EXEC_SEL;
     SYSTEM:   exec_sel_reg = INT_EXEC_SEL;
-    default:  exec_sel_reg = 4'b0000; // No opcode identified. Raises exception
+    default:  begin
+                exec_sel_reg = 4'b0000; // No opcode identified. Raises exception
+                // Raise exception
+              end
   endcase
 
   // uOp generation. The hard one
@@ -218,29 +237,29 @@ always@(*) begin
   // Will writeback on a register?
   // opcodes: LOAD, OPV, OPIMM, AUIPC, OP, LUI, JAL, JALR
   case (dec_opcode_in)
-    LOAD:   rd_write_wire = 1'b1;
-    OPV:    rd_write_wire = 1'b1;
-    OPIMM:  rd_write_wire = 1'b1;
-    AUIPC:  rd_write_wire = 1'b1;
-    OP:     rd_write_wire = 1'b1;
-    LUI:    rd_write_wire = 1'b1;
-    JAL:    rd_write_wire = 1'b1;
-    JALR:   rd_write_wire = 1'b1;
-    BRANCH: rd_write_wire = 1'b0;
-    default:rd_write_wire = 1'b0;
+    LOAD:   rd_write_reg = 1'b1;
+    OPV:    rd_write_reg = 1'b1;
+    OPIMM:  rd_write_reg = 1'b1;
+    AUIPC:  rd_write_reg = 1'b1;
+    OP:     rd_write_reg = 1'b1;
+    LUI:    rd_write_reg = 1'b1;
+    JAL:    rd_write_reg = 1'b1;
+    JALR:   rd_write_reg = 1'b1;
+    BRANCH: rd_write_reg = 1'b0;
+    default:rd_write_reg = 1'b0;
   endcase
 
   // Will write a data value or will write PC+4?
   case(dec_opcode_in)
-    JAL:    rd_data_sel_wire = 1'b1;  //
-    JALR:   rd_data_sel_wire = 1'b1;  //
-    default: rd_data_sel_wire = 1'b0; // E.E.
+    JAL:    rd_data_sel_reg = 1'b1;  //
+    JALR:   rd_data_sel_reg = 1'b1;  //
+    default: rd_data_sel_reg = 1'b0; // E.E.
   endcase
 
   // Is it a jump (JALR)
   case (dec_opcode_in)
-    JALR: jump_sel_wire = 1'b1;
-    default: jump_sel_wire = 1'b0;
+    JALR: jump_sel_reg = 1'b1;
+    default: jump_sel_reg = 1'b0;
   endcase
 
 end
@@ -255,11 +274,14 @@ assign dec_exec_unit_uop_out = exec_uop_reg;
 
 // PC mux selection output
 assign dec_pc_mux_sel_out = pc_mux_sel_reg;
-assign dec_rd_write_enable_out = rd_write_wire;
-assign dec_rd_data_sel_out = rd_data_sel_wire;
-assign dec_jump_sel_out = jump_sel_wire;
+assign dec_rd_write_enable_out = rd_write_reg;
+assign dec_rd_data_sel_out = rd_data_sel_reg;
+assign dec_jump_sel_out = jump_sel_reg;
 
 // Immediate value selection output
 assign dec_imm_mux_sel_out = imm_mux_sel_reg;
+
+// Invalid instruction exception
+assign dec_invalid_ins_exception = invalid_ins;
 
 endmodule
