@@ -22,7 +22,7 @@ module ALU
     input [3:0]             uop_in,
 
     // OUTPUT
-    output [DATA_WIDTH-1:0] result_out
+    output reg [DATA_WIDTH-1:0] result_out
 );
 
 // ==============================================
@@ -46,28 +46,23 @@ module ALU
 // 4'b1111: SLL (Shift Left Logic)
 // ==============================================
 
-// WIRE DEFINITION
-wire [DATA_WIDTH-1:0] alu_result_wire;
-
 // COMBINATIONAL LOGIC
 always@(*) begin
   case(uop_in)
-    4'b0000: alu_result_wire = a_data_in + b_data_in;
-    4'b0001: alu_result_wire = a_data_in - b_data_in;
-    4'b0010: alu_result_wire = a_data_in|b_data_in;
-    4'b0011: alu_result_wire = a_data_in&b_data_in;
-    4'b0100: alu_result_wire = a_data_in^b_data_in;
-    4'b1000: alu_result_wire = a_data_in;
-    4'b1001: alu_result_wire = b_data_in;
-    4'b1010: alu_result_wire = ($signed(a_data_in)<$signed(b_data_in))?32'd1:32'd0;
-    4'b1011: alu_result_wire = (a_data_in<b_data_in)?32'd1:32'd0;
-    4'b1101: alu_result_wire = $signed(a_data_in) >>> b_data_in[4:0];
-    4'b1110: alu_result_wire = a_data_in >> b_data_in[4:0];
-    4'b1111: alu_result_wire = a_data_in << b_data_in[4:0];
-    default: alu_result_wire = 32'h00000000;
+    4'b0000: result_out = a_data_in + b_data_in;
+    4'b0001: result_out = a_data_in - b_data_in;
+    4'b0010: result_out = a_data_in|b_data_in;
+    4'b0011: result_out = a_data_in&b_data_in;
+    4'b0100: result_out = a_data_in^b_data_in;
+    4'b1000: result_out = a_data_in;
+    4'b1001: result_out = b_data_in;
+    4'b1010: result_out = ($signed(a_data_in)<$signed(b_data_in))?32'd1:32'd0;
+    4'b1011: result_out = (a_data_in<b_data_in)?32'd1:32'd0;
+    4'b1101: result_out = $signed(a_data_in) >>> b_data_in[4:0];
+    4'b1110: result_out = a_data_in >> b_data_in[4:0];
+    4'b1111: result_out = a_data_in << b_data_in[4:0];
+    default: result_out = 32'h00000000;
   endcase
 end
-
-assign result_out = alu_result_wire;
 
 endmodule
