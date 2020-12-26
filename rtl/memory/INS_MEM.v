@@ -19,10 +19,32 @@ module INS_MEM #(
 )(
   input ins_mem_valid_in,
   input [XLEN-1:0] ins_mem_addr_in,
-  output ins_mem_ready_out,
-  output [XLEN-1:0] ins_mem_data_out
+  output reg ins_mem_ready_out,
+  output reg [XLEN-1:0] ins_mem_data_out
 );
 
+// Sets memory addressing width
+parameter MEM_ADDR = 10;
 
+// Parameter to set memory size
+parameter MEM_SIZE = 2 ** MEM_ADDR;
+
+// Defines memory
+reg [7:0] ins_mem [0:MEM_SIZE-1];
+
+initial
+  $readmemh("./rtl/memory/ins_mem.hex", ins_mem);
+
+always @ ( * ) begin
+  if(ins_mem_valid_in == 1'b1) begin
+    ins_mem_data_out = {
+      ins_mem[ins_mem_addr_in[MEM_ADDR-1:0] + 3],
+      ins_mem[ins_mem_addr_in[MEM_ADDR-1:0] + 2],
+      ins_mem[ins_mem_addr_in[MEM_ADDR-1:0] + 1],
+      ins_mem[ins_mem_addr_in[MEM_ADDR-1:0]]
+    };
+    ins_mem_ready_out = 1'b1;
+  end
+end
 
 endmodule
