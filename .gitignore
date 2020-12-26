@@ -10,3 +10,6 @@ transcript
 
 # Ignores HEX files from memory RTL modules
 rtl/memory/*.hex
+
+# Ignores backup files
+*.bak
