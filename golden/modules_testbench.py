@@ -33,15 +33,17 @@ def run_testbench(module_name, number):
 	# Defines module dictionary
 	modules_dict = {
 		"PC_CALC": PC_CALC(),
-		"PRED": PREDICTOR(),
+		"PREDICTOR": PREDICTOR(),
+		"PREDICTOR_CHECK": PREDICTOR_CHECK(),
 		"IMM_GEN": IMM_GEN(),
 		"DEC": DECODER(),
 		"FWD": FORWARDING_UNIT(),
 		"REG": REGISTERS(),
 		"IS": ISSUE(),
-		"BRU": BRANCH_RESOLVER(),
+		"BRU": BRU(),
 		"ALU": ALU(),
-		"LSU": LSU()
+		"LSU": LSU(),
+		"PIPELINE": PIPELINE_CONTROL()
 	}
 
 	# Tries to get module from dictionary
@@ -61,7 +63,7 @@ def run_testbench(module_name, number):
 		
 		# Generates random inputs
 		_in = module.generate_random_inputs()
-		
+
 		# Calculates outputs based on random inputs
 		_out = module.execute(_in)
 
