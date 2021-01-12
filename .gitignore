@@ -13,3 +13,6 @@ rtl/memory/*.hex
 
 # Ignores backup files
 *.bak
+
+# Ignores Python compilation cache
+*.pyc
