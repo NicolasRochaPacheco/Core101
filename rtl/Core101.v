@@ -192,7 +192,7 @@ PREDICTOR predictor0 (
 );
 
 // IF/DEC pipeline register
-REG #(.XLEN(IF_DEC_WIDTH)) if_dec_pipeline_reg (
+REG #(.DATA_WIDTH(IF_DEC_WIDTH)) if_dec_pipeline_reg (
   .reg_clock_in(clock_in),
   .reg_reset_in(reset_in),
   .reg_clear_in(pipeline_if_dec_clear_wire),
@@ -242,7 +242,7 @@ DECODE_UNIT decode0 (
 );
 
 // DEC/REG pipeline register
-REG #(.XLEN(DEC_REG_WIDTH)) dec_reg_pipeline_reg (
+REG #(.DATA_WIDTH(DEC_REG_WIDTH)) dec_reg_pipeline_reg (
   .reg_clock_in(clock_in),
   .reg_reset_in(reset_in),
   .reg_clear_in(pipeline_dec_reg_clear_wire),
@@ -303,7 +303,7 @@ ISSUE_UNIT issue0 (
 );
 
 // REG/EX pipeline register
-REG #(.XLEN(REG_EX_WIDTH)) reg_ex_pipeline_reg (
+REG #(.DATA_WIDTH(REG_EX_WIDTH)) reg_ex_pipeline_reg (
   .reg_clock_in(clock_in),
   .reg_reset_in(reset_in),
   .reg_clear_in(pipeline_reg_ex_clear_wire),
