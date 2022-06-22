@@ -160,7 +160,7 @@ PC_CALC #(.XLEN(XLEN)) pc_calc (
 
 
 // PC/IF pipeline register
-REG #(.XLEN(PC_IF_WIDTH)) pc_if_pipeline_reg (
+REG #(.DATA_WIDTH(PC_IF_WIDTH)) pc_if_pipeline_reg (
   .reg_clock_in(clock_in),
   .reg_reset_in(reset_in),
   .reg_clear_in(pipeline_pc_if_clear_wire),
